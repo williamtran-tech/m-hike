@@ -85,5 +85,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/emailEditTxt" />
 
+    <ImageView
+        android:id="@+id/compassImg"
+        android:layout_width="285dp"
+        android:layout_height="328dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/compassValueTxt"
+        app:srcCompat="@drawable/compass" />
+
+    <TextView
+        android:id="@+id/compassValueTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:text="Value"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/saveBtn" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

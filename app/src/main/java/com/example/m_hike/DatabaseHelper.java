@@ -16,6 +16,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Built-in class for representing db manipulation
     private final SQLiteDatabase database;
+    public final SQLiteDatabase getDatabase(){
+        return this.database;
+    }
 
     private static final String DATABASE_CREATE_QUERY = String.format(
             "CREATE TABLE %s (" +
