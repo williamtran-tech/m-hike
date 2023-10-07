@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.modules.CompassHandler;
 
 public class MainActivity extends AppCompatActivity {
