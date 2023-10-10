@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         String name = nameTxt.getText().toString();
         String email = emailTxt.getText().toString();
         String location = locationTxt.getText().toString();
-        long personId = dbHelper.insertTest(name, location, email);
+        long personId = dbHelper.insertHike(name, location, email);
 
         // Make the device vibrate
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
@@ -78,5 +79,7 @@ public class MainActivity extends AppCompatActivity {
         nameTxt.setText("");
         emailTxt.setText("");
         locationTxt.setText("");
+
+        Log.d("Get Hikes:", dbHelper.getHikes());
     }
 }

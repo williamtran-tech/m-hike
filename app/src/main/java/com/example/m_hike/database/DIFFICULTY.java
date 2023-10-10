@@ -55,5 +55,24 @@ public final class DIFFICULTY {
         public static final String TABLE_NAME = "difficulties";
         public static final String ID_COLUMN_NAME = "id";
         public static final String NAME_COLUMN_NAME = "name";
+
+        public static final String CREATE_QUERY = String.format(
+                "CREATE TABLE %s (" +
+                        "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "%s TEXT NOT NULL)", DIFFICULTY.DifficultyEntry.TABLE_NAME, DIFFICULTY.DifficultyEntry.ID_COLUMN_NAME, DIFFICULTY.DifficultyEntry.NAME_COLUMN_NAME
+        );
+        public static String[] Seed() {
+            String[] DIFFICULTIES = new String[] {
+                    "Easy",
+                    "Medium",
+                    "Hard"
+            };
+            String[] res = new String[DIFFICULTIES.length];
+            for (int i = 0; i < DIFFICULTIES.length; i++) {
+                res[i] = ("INSERT INTO difficulties (name) VALUES (" + DIFFICULTIES[i] + ")");
+            }
+
+            return res;
+        };
     }
 }
