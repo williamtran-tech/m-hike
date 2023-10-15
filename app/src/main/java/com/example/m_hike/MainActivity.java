@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         vibrator.vibrate(400);
 
         // Notify
-        Toast.makeText(this, "Person has been created with ID: " + personId, Toast.LENGTH_SHORT - 500).show();
+        Toast.makeText(this, "Hikes: " + dbHelper.getHikes(), Toast.LENGTH_SHORT - 500).show();
 
         // Clear fields
         nameTxt.setText("");
