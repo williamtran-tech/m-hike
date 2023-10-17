@@ -1,11 +1,14 @@
 package com.example.m_hike.database;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
+
+import com.example.m_hike.models.Hike;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +24,7 @@ public final class HIKE implements BaseColumns {
         public static final String DATE_COLUMN_NAME = "date";
         public static final String AVAILABLE_PARKING_COLUMN_NAME = "availableParking";
         public static final String DURATION_COLUMN_NAME = "duration";
+        public static final String DISTANCE_COLUMN_NAME = "distance";
         public static final String DESCRIPTION_COLUMN_NAME = "description";
         public static final String DIFFICULTY_COLUMN_NAME = "difficultyId";
 
@@ -32,10 +36,11 @@ public final class HIKE implements BaseColumns {
                         "%s TEXT, " +
                         "%s CHECK (availableParking IN (0, 1)), " +
                         "%s REAL, " +
+                        "%s REAL, " +
                         "%s TEXT, " +
                         "%s INTEGER DEFAULT 1 NOT NULL, " +
                         "FOREIGN KEY (%s) REFERENCES difficulties(id)" +
-                        ")", HIKE.HikeEntry.TABLE_NAME, HIKE.HikeEntry.ID_COLUMN_NAME, HIKE.HikeEntry.NAME_COLUMN_NAME, HIKE.HikeEntry.LOCATION_COLUMN_NAME, HIKE.HikeEntry.DATE_COLUMN_NAME, HIKE.HikeEntry.AVAILABLE_PARKING_COLUMN_NAME, HIKE.HikeEntry.DURATION_COLUMN_NAME, HIKE.HikeEntry.DESCRIPTION_COLUMN_NAME, HIKE.HikeEntry.DIFFICULTY_COLUMN_NAME, HIKE.HikeEntry.DIFFICULTY_COLUMN_NAME);
+                        ")", HIKE.HikeEntry.TABLE_NAME, HIKE.HikeEntry.ID_COLUMN_NAME, HIKE.HikeEntry.NAME_COLUMN_NAME, HIKE.HikeEntry.LOCATION_COLUMN_NAME, HIKE.HikeEntry.DATE_COLUMN_NAME, HIKE.HikeEntry.AVAILABLE_PARKING_COLUMN_NAME, HIKE.HikeEntry.DURATION_COLUMN_NAME, HikeEntry.DISTANCE_COLUMN_NAME, HIKE.HikeEntry.DESCRIPTION_COLUMN_NAME, HIKE.HikeEntry.DIFFICULTY_COLUMN_NAME, HIKE.HikeEntry.DIFFICULTY_COLUMN_NAME);
     }
 
 
@@ -44,8 +49,8 @@ public final class HIKE implements BaseColumns {
         public List<HikeData> getHikes(SQLiteDatabase db) {
             List<HikeData> resultList = new ArrayList<HikeData>();
             String query = String.format(
-                    "SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s INNER JOIN %s ON %s.%s = %s.%s",
-                    HIKE.HikeEntry.ID_COLUMN_NAME, HIKE.HikeEntry.NAME_COLUMN_NAME, HIKE.HikeEntry.LOCATION_COLUMN_NAME, HIKE.HikeEntry.DATE_COLUMN_NAME, HIKE.HikeEntry.AVAILABLE_PARKING_COLUMN_NAME, HIKE.HikeEntry.DURATION_COLUMN_NAME, HIKE.HikeEntry.DESCRIPTION_COLUMN_NAME, DIFFICULTY.DifficultyEntry.NAME_COLUMN_NAME, HIKE.HikeEntry.TABLE_NAME, DIFFICULTY.DifficultyEntry.TABLE_NAME, HIKE.HikeEntry.TABLE_NAME, HIKE.HikeEntry.DIFFICULTY_COLUMN_NAME, DIFFICULTY.DifficultyEntry.TABLE_NAME, DIFFICULTY.DifficultyEntry.ID_COLUMN_NAME);
+                    "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s INNER JOIN %s ON %s.%s = %s.%s",
+                    HIKE.HikeEntry.ID_COLUMN_NAME, HIKE.HikeEntry.NAME_COLUMN_NAME, HIKE.HikeEntry.LOCATION_COLUMN_NAME, HIKE.HikeEntry.DATE_COLUMN_NAME, HIKE.HikeEntry.AVAILABLE_PARKING_COLUMN_NAME, HIKE.HikeEntry.DURATION_COLUMN_NAME, HikeEntry.DISTANCE_COLUMN_NAME, HIKE.HikeEntry.DESCRIPTION_COLUMN_NAME, DIFFICULTY.DifficultyEntry.NAME_COLUMN_NAME, HIKE.HikeEntry.TABLE_NAME, DIFFICULTY.DifficultyEntry.TABLE_NAME, HIKE.HikeEntry.TABLE_NAME, HIKE.HikeEntry.DIFFICULTY_COLUMN_NAME, DIFFICULTY.DifficultyEntry.TABLE_NAME, DIFFICULTY.DifficultyEntry.ID_COLUMN_NAME);
             Cursor results = db.rawQuery(query , null);
 
             if (results.moveToFirst()) {
@@ -106,6 +111,13 @@ public final class HIKE implements BaseColumns {
         public void setDuration(Float duration) {
             this.duration = duration;
         }
+        public Float getDistance() {
+            return distance;
+        }
+
+        public void setDistance(Float distance) {
+            this.distance = distance;
+        }
 
         public String getDescription() {
             return description;
@@ -136,6 +148,7 @@ public final class HIKE implements BaseColumns {
         private String date;
         private boolean availableParking;
         private Float duration;
+        private Float distance;
         private String description;
         private Integer difficultyId;
         private String difficulty;

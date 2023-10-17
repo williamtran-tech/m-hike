@@ -19,6 +19,8 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
+import android.widget.RatingBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +28,7 @@ import android.widget.Toast;
 import com.example.m_hike.R;
 import com.example.m_hike.database.DatabaseHelper;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -90,14 +93,34 @@ public class AddFragment extends Fragment {
     private void saveDetails() {
         EditText nameTxt = getActivity().findViewById(R.id.nameEditTxt);
         TextView date = getActivity().findViewById(R.id.editTextDate);
-
         EditText locationTxt = getActivity().findViewById(R.id.locationEditTxt);
+        RatingBar ratingBar = getActivity().findViewById(R.id.ratingBar);
+        EditText duration = getActivity().findViewById(R.id.durationEditTxt);
+        EditText distance = getActivity().findViewById(R.id.distanceEditTxt);
+        RadioGroup radioGroup = getActivity().findViewById(R.id.parkingRadioGroup);
+
 
         String name = nameTxt.getText().toString();
+        // extract the date from the text view
+        String dateStr = date.getText().toString();
+        String d1 = dateStr.substring(dateStr.substring(0, dateStr.indexOf(", ")).length() + 2, dateStr.length());
+        // convert the date string to date object
+        Date dateObj = null;
+        try {
+            dateObj = new SimpleDateFormat("dd/MM/yyyy").parse(d1);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
         String location = locationTxt.getText().toString();
-//        Date insertDate = new Date(date.getYear(), date.getMonth(), date.getDayOfMonth());
-        Date insertDate = new Date();
-        long personId = dbHelper.insertHike(name, location, insertDate);
+        boolean availableParking = radioGroup.getCheckedRadioButtonId() == R.id.yesRadioButton;
+        int rating = (int) ratingBar.getRating();
+        if (name.isEmpty() || dateStr.isEmpty() || location.isEmpty() || duration.getText().toString().isEmpty() || distance.getText().toString().isEmpty() || rating == 0) {
+            Toast.makeText(getActivity(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Float durationFloat = Float.parseFloat(duration.getText().toString());
+        Float distanceFloat = Float.parseFloat(distance.getText().toString());
+        long hikeId = dbHelper.insertHike(name, dateObj, location, availableParking, rating, durationFloat, distanceFloat);
 
 
         // Make the device vibrate
@@ -110,6 +133,9 @@ public class AddFragment extends Fragment {
         // Clear fields
         nameTxt.setText("");
         locationTxt.setText("");
+        ratingBar.setRating(0);
+        duration.setText("");
+        distance.setText("");
 
         Log.d("Get Hikes:", dbHelper.getHikes());
     }

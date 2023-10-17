@@ -107,7 +107,7 @@
                         android:background="@drawable/edit_txt"
                         android:ems="10"
                         android:hint="Hike location"
-                        android:inputType="textEmailAddress"
+                        android:inputType="text"
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
                         android:textSize="14sp"
@@ -137,14 +137,14 @@
                         app:layout_constraintTop_toBottomOf="@+id/locationEditTxt">
 
                         <RadioButton
-                            android:id="@+id/radioButton"
+                            android:id="@+id/yesRadioButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:checked="false"
                             android:text="Yes" />
 
                         <RadioButton
-                            android:id="@+id/radioButton2"
+                            android:id="@+id/noRadioButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:checked="true"
@@ -192,7 +192,7 @@
                         android:background="@drawable/edit_txt"
                         android:ems="10"
                         android:hint="Duration (hours)"
-                        android:inputType="textEmailAddress"
+                        android:inputType="number|numberDecimal"
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
                         android:textSize="14sp"

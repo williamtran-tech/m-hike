@@ -44,11 +44,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public long insertHike(String name, String location, Date date) {
+    public long insertHike(String name, Date date, String location, boolean availableParking, Integer difficulty, Float duration, Float distance) {
         ContentValues rowValues = new ContentValues(); // new row object
         rowValues.put(HIKE.HikeEntry.NAME_COLUMN_NAME, name);
+        rowValues.put(HIKE.HikeEntry.DATE_COLUMN_NAME, date.toString());
         rowValues.put(HIKE.HikeEntry.LOCATION_COLUMN_NAME, location);
-//        rowValues.put(LOCATION_COLUMN_NAME, location);
+        rowValues.put(HIKE.HikeEntry.AVAILABLE_PARKING_COLUMN_NAME, availableParking);
+        rowValues.put(HIKE.HikeEntry.DIFFICULTY_COLUMN_NAME, difficulty);
+        rowValues.put(HIKE.HikeEntry.DURATION_COLUMN_NAME, duration);
+        rowValues.put(HIKE.HikeEntry.DISTANCE_COLUMN_NAME, distance);
 
         return database.insertOrThrow(HIKE.HikeEntry.TABLE_NAME, null, rowValues);
     }

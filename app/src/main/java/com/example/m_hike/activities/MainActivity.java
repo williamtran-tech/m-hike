@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 //        });
 
         DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
-        dbHelper.onUpgrade(dbHelper.getDatabase(), 1, 2);
+//        dbHelper.onUpgrade(dbHelper.getDatabase(), 1, 2);
 
 
         // Fragment
