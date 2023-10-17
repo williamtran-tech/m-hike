@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.Date;
 import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -43,7 +44,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public long insertHike(String name, String location, String email) {
+    public long insertHike(String name, String location, Date date) {
         ContentValues rowValues = new ContentValues(); // new row object
         rowValues.put(HIKE.HikeEntry.NAME_COLUMN_NAME, name);
         rowValues.put(HIKE.HikeEntry.LOCATION_COLUMN_NAME, location);
@@ -75,9 +76,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private void seedDifficulties(SQLiteDatabase sqLiteDatabase) {
         String[] difficulties = new String[] {
+                "Very Easy",
                 "Easy",
                 "Medium",
-                "Hard"
+                "Hard",
+                "Extreme"
         };
 
         for (String difficulty : difficulties) {

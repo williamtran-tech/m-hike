@@ -63,9 +63,11 @@ public final class DIFFICULTY {
         );
         public static String[] Seed() {
             String[] DIFFICULTIES = new String[] {
+                    "Very Easy",
                     "Easy",
                     "Medium",
-                    "Hard"
+                    "Hard",
+                    "Extreme"
             };
             String[] res = new String[DIFFICULTIES.length];
             for (int i = 0; i < DIFFICULTIES.length; i++) {

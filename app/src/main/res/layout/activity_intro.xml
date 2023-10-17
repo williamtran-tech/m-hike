@@ -15,7 +15,7 @@
         android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/splash"
+        app:srcCompat="@drawable/intro_background"
         tools:ignore="MissingConstraints" />
 
     <TextView
@@ -27,6 +27,7 @@
         android:text="Hiking in Vietnam"
         android:textColor="@color/black"
         android:textSize="40dp"
+        android:fontFamily="@font/lobster"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/splashImg" />
@@ -37,8 +38,8 @@
         android:layout_height="60dp"
         android:layout_marginTop="12dp"
         android:justificationMode="inter_word"
-        android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris auctor tortor eu lectus egestas, aliquet euismod nibh egestas.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris auctor tortor eu lectus egestas, aliquet euismod nibh egestas."
-        android:textColor="@color/black"
+        android:text="@string/description"
+        android:textColor="#343434"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/titleTxt"
         app:layout_constraintTop_toBottomOf="@+id/titleTxt" />
@@ -50,7 +51,9 @@
         android:layout_height="46dp"
         android:layout_marginTop="68dp"
         android:background="@drawable/background_btn"
-        android:text="Let's Start!"
+        android:drawableEnd="@drawable/baseline_arrow_forward_24"
+        android:paddingEnd="25dp"
+        android:text="@string/StartBtn"
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -60,4 +63,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/describeTxt"
         app:layout_constraintVertical_bias="0.41" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

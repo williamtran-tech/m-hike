@@ -8,4 +8,6 @@
     <color name="black">#151515</color>
     <color name="white">#FFFFFFFF</color>
     <color name="buttonColor">#FF002E57</color>
+    <color name="buttonStroke">#CFCFCF</color>
+    <color name="golden">#FFE600</color>
 </resources>
