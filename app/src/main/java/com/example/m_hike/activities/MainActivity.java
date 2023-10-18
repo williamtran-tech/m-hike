@@ -25,6 +25,7 @@ import com.example.m_hike.modules.CompassHandler;
 
 public class MainActivity extends AppCompatActivity {
     private CompassHandler compassHandler;
+    private DatabaseHelper dbHelper;
     ActivityMainBinding binding;
 
     @Override
@@ -34,17 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Hide action bar
         getSupportActionBar().hide();
-//        Button saveBtn = (Button) findViewById(R.id.saveBtn);
-//        saveBtn.setOnClickListener( new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                saveDetails();
-//            }
-//        });
-
-        DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
-//        dbHelper.onUpgrade(dbHelper.getDatabase(), 1, 2);
-
 
         // Fragment
         binding =  ActivityMainBinding.inflate(getLayoutInflater());
@@ -62,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
                 replaceFragment(new AddFragment());
                 return true;
             } else if (item.getItemId() == R.id.setting && !(getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof SettingFragment)) {
-                dbHelper.onUpgrade(dbHelper.getDatabase(), 1, 2);
                 replaceFragment(new SettingFragment());
                 return true;
             }
@@ -78,16 +67,19 @@ public class MainActivity extends AppCompatActivity {
 
     private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
 //        if (fragment instanceof HomeFragment)
 //            fragmentTransaction.setCustomAnimations(R.anim.bottom_down, R.anim.bottom_up);
 //        else if (fragment instanceof AddFragment)
 //            fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
 //        else if (fragment instanceof SettingFragment)
 //            fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.addToBackStack(null); // Add this transaction to the back stack.
 
-        fragmentTransaction.commit();
+        transaction.commit();
     }
 
     @Override
@@ -108,6 +100,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // Do nothing
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            // If there are fragments in the back stack, pop the back stack.
+            getSupportFragmentManager().popBackStack();
+        } else {
+            // If there are no fragments in the back stack, let the default behavior exit the app.
+            super.onBackPressed();
+        }
     }
+
 }

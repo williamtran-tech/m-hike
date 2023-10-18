@@ -71,10 +71,14 @@ public final class DIFFICULTY {
             };
             String[] res = new String[DIFFICULTIES.length];
             for (int i = 0; i < DIFFICULTIES.length; i++) {
-                res[i] = ("INSERT INTO difficulties (name) VALUES (" + DIFFICULTIES[i] + ")");
+                res[i] = ("INSERT INTO difficulties (name) VALUES (\"" + DIFFICULTIES[i] + "\")");
+//                res[i] = ("INSERT INTO difficulties (name) VALUES (" + DIFFICULTIES[i] + ")");
             }
 
             return res;
         };
+        public static String getDifficulties() {
+            return "SELECT * FROM " + DIFFICULTY.DifficultyEntry.TABLE_NAME;
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.example.m_hike.models;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Hike {
@@ -9,8 +11,8 @@ public class Hike {
     private Date date;
     private boolean availableParking;
     private Float duration;
-    private String description;
-    private Integer difficulty;
+    private Float distance;
+    private Difficulty difficulty;
 
     public int getId() {
         return id;
@@ -36,31 +38,34 @@ public class Hike {
         return duration;
     }
 
-    public String getDescription() {
-        return description;
+    public Float getDistance() {
+        return distance;
     }
 
-    public Integer getDifficulty() {
+    public Difficulty getDifficulty() {
         return difficulty;
     }
 
-    public void createHike(String name, String location, Date date, boolean availableParking, Float duration, String description, Integer difficulty) {
+    public Hike(Integer id, String name, String location, String date, boolean availableParking, Float duration, Float distance, Difficulty difficulty) throws ParseException {
+        this.id = id;
         this.name = name;
         this.location = location;
-        this.date = date;
+        // Use the correct date format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+        this.date = dateFormat.parse(date);
         this.availableParking = availableParking;
         this.duration = duration;
-        this.description = description;
+        this.distance = distance;
         this.difficulty = difficulty;
     }
 
-    public void updateHike(String name, String location, Date date, boolean availableParking, Float duration, String description, Integer difficulty) {
+    public void updateHike(String name, String location, Date date, boolean availableParking, Float duration, Float distance, Difficulty difficulty) {
         this.name = name;
         this.location = location;
         this.date = date;
         this.availableParking = availableParking;
         this.duration = duration;
-        this.description = description;
+        this.distance = distance;
         this.difficulty = difficulty;
     }
 

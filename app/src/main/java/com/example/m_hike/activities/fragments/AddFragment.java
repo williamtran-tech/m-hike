@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.example.m_hike.R;
 import com.example.m_hike.database.DatabaseHelper;
+import com.example.m_hike.models.Hike;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -69,9 +70,33 @@ public class AddFragment extends Fragment {
         saveBtn.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveDetails();
+                try {
+                    saveDetails();
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
+
+        // Hot fix
+//        EditText duration = (EditText) addFragmentView.findViewById(R.id.durationEditTxt);
+//        duration.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                BottomNavigationView navBar = getActivity().findViewById(R.id.bottomNavigationView);
+//                navBar.setVisibility(View.GONE);
+//            }
+//        });
+//
+//        EditText distance = (EditText) addFragmentView.findViewById(R.id.distanceEditTxt);
+//        distance.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                BottomNavigationView navBar = getActivity().findViewById(R.id.bottomNavigationView);
+//                navBar.setVisibility(View.GONE);
+//            }
+//        });
+
 
         // Change opacity of the background image when scroll
         ImageView background = (ImageView) addFragmentView.findViewById(R.id.imageView);
@@ -90,7 +115,7 @@ public class AddFragment extends Fragment {
         return addFragmentView;
     }
 
-    private void saveDetails() {
+    private void saveDetails() throws ParseException {
         EditText nameTxt = getActivity().findViewById(R.id.nameEditTxt);
         TextView date = getActivity().findViewById(R.id.editTextDate);
         EditText locationTxt = getActivity().findViewById(R.id.locationEditTxt);
@@ -120,7 +145,7 @@ public class AddFragment extends Fragment {
         }
         Float durationFloat = Float.parseFloat(duration.getText().toString());
         Float distanceFloat = Float.parseFloat(distance.getText().toString());
-        long hikeId = dbHelper.insertHike(name, dateObj, location, availableParking, rating, durationFloat, distanceFloat);
+        Hike hike = dbHelper.insertHike(name, dateObj, location, availableParking, rating, durationFloat, distanceFloat);
 
 
         // Make the device vibrate
@@ -128,7 +153,7 @@ public class AddFragment extends Fragment {
         vibrator.vibrate(400);
 
         // Notify
-        Toast.makeText(getActivity(), "Hikes: " + dbHelper.getHikes(), Toast.LENGTH_SHORT - 500).show();
+        Toast.makeText(getActivity(), "Hikes " + hike.getName() + " added successfully", Toast.LENGTH_SHORT - 500).show();
 
         // Clear fields
         nameTxt.setText("");
@@ -137,7 +162,7 @@ public class AddFragment extends Fragment {
         duration.setText("");
         distance.setText("");
 
-        Log.d("Get Hikes:", dbHelper.getHikes());
+        Log.d("Get Hikes:", dbHelper.getHikes().toString());
     }
 
     public static class DatePickerDialogTheme extends DialogFragment implements DatePickerDialog.OnDateSetListener {

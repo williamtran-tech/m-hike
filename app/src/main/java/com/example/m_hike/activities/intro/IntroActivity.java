@@ -2,6 +2,7 @@ package com.example.m_hike.activities.intro;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 
 import androidx.annotation.Nullable;
@@ -10,6 +11,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.m_hike.activities.MainActivity;
 import com.example.m_hike.R;
 import com.example.m_hike.database.DatabaseHelper;
+import com.example.m_hike.models.Hike;
+
+import java.text.ParseException;
+import java.util.ArrayList;
 
 public class IntroActivity extends AppCompatActivity {
     private Button startBtn;
@@ -21,13 +26,31 @@ public class IntroActivity extends AppCompatActivity {
         setContentView(R.layout.activity_intro);
 
         dbHelper = new DatabaseHelper(getApplicationContext());
-//        dbHelper.onUpgrade(dbHelper.getDatabase(), 1, 2);
 
         // Hide the action bar
         getSupportActionBar().hide();
 
-        if (!dbHelper.getHikes().isEmpty()){
-            startActivity(new Intent(IntroActivity.this, MainActivity.class));
+        boolean flag;
+        try {
+            ArrayList<Hike> test = dbHelper.getHikes();
+            if (test.isEmpty()) {
+                flag = false;
+                Log.d("Hikes: ", "Empty");
+            } else {
+                flag = true;
+            }
+        } catch (RuntimeException e) {
+            flag = false;
+            Log.d("Hikes: ", "Empty");
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (flag){
+            Intent intent = new Intent(IntroActivity.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
         } else {
             initView();
         }
@@ -38,7 +61,8 @@ public class IntroActivity extends AppCompatActivity {
         startBtn.setOnClickListener(view -> {
             startActivity(new Intent(IntroActivity.this, MainActivity.class));
             // transition to main activity
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            overridePendingTransition(R.anim.fade_in, R.anim.slide_out_left);
+            finish();
         });
     }
 }

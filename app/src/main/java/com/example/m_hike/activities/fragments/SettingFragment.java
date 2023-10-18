@@ -11,8 +11,6 @@ import android.view.ViewGroup;
 import com.example.m_hike.R;
 
 public class SettingFragment extends Fragment {
-
-
     public SettingFragment() {
         // Required empty public constructor
     }
@@ -20,7 +18,6 @@ public class SettingFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override

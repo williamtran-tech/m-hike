@@ -11,6 +11,9 @@ import android.view.ViewGroup;
 
 import com.example.m_hike.R;
 import com.example.m_hike.database.DatabaseHelper;
+import com.example.m_hike.models.Difficulty;
+
+import java.text.ParseException;
 
 public class HomeFragment extends Fragment {
     private DatabaseHelper dbHelper;
@@ -24,7 +27,14 @@ public class HomeFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         dbHelper = new DatabaseHelper(getActivity().getBaseContext());
-        Log.d("Hikes: ", dbHelper.getHikes().toString());
+        try {
+            Log.d("Hikes: ", dbHelper.getHikes().toString());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        for (Difficulty difficulty : dbHelper.getDifficulties()) {
+            Log.d("Difficulty: ", difficulty.getName());
+        }
     }
 
     @Override
@@ -33,4 +43,5 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
+
 }
