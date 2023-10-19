@@ -7,8 +7,11 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -22,10 +25,10 @@ import com.example.m_hike.activities.fragments.SettingFragment;
 import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.databinding.ActivityMainBinding;
 import com.example.m_hike.modules.CompassHandler;
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
-    private CompassHandler compassHandler;
-    private DatabaseHelper dbHelper;
     ActivityMainBinding binding;
 
     @Override
@@ -33,9 +36,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         // Hide action bar
         getSupportActionBar().hide();
 
+        // Set bigger ICON bottom navigation - Still shit
+//        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
+//        BottomNavigationItemView itemView = bottomNavigationView.findViewById(R.id.add);
+//        View iconView = itemView.getChildAt(2);
+//        final ViewGroup.LayoutParams layoutParams = iconView.getLayoutParams();
+//        final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+//        layoutParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60, displayMetrics);
+//        layoutParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60, displayMetrics);
+//        iconView.setLayoutParams(layoutParams);
         // Fragment
         binding =  ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
