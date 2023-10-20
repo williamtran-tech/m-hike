@@ -28,7 +28,7 @@
                 android:id="@+id/name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="14dp"
                 android:layout_marginTop="20dp"
                 android:maxLength="20"
                 android:text="Hike Name"
@@ -47,77 +47,131 @@
                 android:src="@drawable/baseline_location_on_24"
                 app:layout_constraintBottom_toBottomOf="@+id/location"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/location"
                 tools:ignore="MissingConstraints" />
 
-            <!-- Hike Duration -->
             <TextView
                 android:id="@+id/location"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="370dp"
+                android:layout_height="45dp"
+                android:layout_marginStart="5dp"
                 android:layout_marginTop="10dp"
-                android:maxLength="30"
-                android:maxLines="1"
-                android:text="Location"
+                android:maxLines="2"
+                android:gravity="center_vertical"
+                android:text="Location lomng asd asd asd asd asd asd asdasdasdasd"
+                android:paddingEnd="10dp"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.012"
                 app:layout_constraintStart_toEndOf="@+id/locationIcon"
                 app:layout_constraintTop_toBottomOf="@+id/name" />
 
+            <!-- Hike Duration -->
+            <ImageView
+                android:id="@+id/durationIcon"
+                android:layout_width="29dp"
+                android:layout_height="29dp"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/baseline_duration_24"
+                app:layout_constraintBottom_toBottomOf="@+id/duration"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/durationTxt"
+                tools:ignore="MissingConstraints" />
+            <TextView
+                android:id="@+id/durationTxt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:text="Time duration"
+                android:textSize="10sp"
+                app:layout_constraintStart_toEndOf="@id/durationIcon"
+                app:layout_constraintTop_toBottomOf="@+id/location" />
             <TextView
                 android:id="@+id/duration"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="5dp"
+                android:gravity="center_vertical"
+                android:text="2 h"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/durationIcon"
+                app:layout_constraintTop_toBottomOf="@+id/durationTxt" />
+
+            <!-- Hike Distance -->
+            <ImageView
+                android:id="@+id/distanceIcon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="30dp"
+                android:src="@drawable/baseline_hiking_24"
+                app:layout_constraintBottom_toBottomOf="@+id/distance"
+                app:layout_constraintStart_toEndOf="@id/durationTxt"
+                app:layout_constraintTop_toTopOf="@+id/distanceTxt"
+                tools:ignore="MissingConstraints" />
+            <TextView
+                android:id="@+id/distanceTxt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Duration: 2 hours"
-                android:textSize="14sp"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginStart="5dp"
+                android:gravity="center_vertical"
+                android:text="Distance"
+                android:textSize="10sp"
+                app:layout_constraintStart_toEndOf="@id/distanceIcon"
                 app:layout_constraintTop_toBottomOf="@+id/location" />
 
-            <!-- Hike Difficulty (Rating Bar) -->
-            <!-- Hike Distance -->
             <TextView
                 android:id="@+id/distance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:layout_marginTop="10dp"
-                android:text="Distance: 5 km"
-                android:textSize="14sp"
-                app:layout_constraintStart_toEndOf="@+id/duration"
-                app:layout_constraintTop_toBottomOf="@+id/location"
+                android:layout_marginStart="5dp"
+                android:text="5 km"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@+id/distanceIcon"
+                app:layout_constraintTop_toBottomOf="@+id/distanceTxt"
                 tools:ignore="MissingConstraints" />
             <!-- Hike Date -->
             <ImageView
                 android:id="@+id/dateIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="30dp"
+                android:layout_height="28dp"
                 android:layout_marginStart="10dp"
+                android:layout_marginTop="15dp"
                 android:src="@drawable/baseline_date_range_24"
                 app:layout_constraintBottom_toBottomOf="@+id/date"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/duration"
                 tools:ignore="MissingConstraints" />
 
             <TextView
                 android:id="@+id/date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="5dp"
                 android:layout_marginTop="14dp"
                 android:text="January 1, 2023"
                 android:textSize="14sp"
-                android:textStyle="italic"
                 app:layout_constraintStart_toEndOf="@id/dateIcon"
-                app:layout_constraintTop_toBottomOf="@+id/distance" />
+                app:layout_constraintTop_toBottomOf="@+id/duration" />
 
+            <!-- Hike Difficulty (Rating Bar) -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/ratingChip"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="16dp"
-                android:text="Chip"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="35dp"
+                app:chipMinTouchTargetSize="1dp"
+                android:text="Hard"
+                android:textSize="16dp"
+                app:layout_constraintBottom_toBottomOf="@+id/distance"
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:ignore="MissingConstraints" />
 

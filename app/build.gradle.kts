@@ -45,6 +45,15 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("com.google.android.gms:play-services-maps:18.2.0")
 
+    // CameraX core library
+    implementation("androidx.camera:camera-core:1.1.0-alpha06")
+    // CameraX Camera2 extensions
+    implementation("androidx.camera:camera-camera2:1.1.0-alpha06")
+    // CameraX Lifecycle library
+    implementation("androidx.camera:camera-lifecycle:1.1.0-alpha06")
+    // CameraX View library
+    implementation("androidx.camera:camera-view:1.0.0-alpha27")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

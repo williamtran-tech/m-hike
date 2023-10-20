@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import com.example.m_hike.models.Difficulty;
 import com.example.m_hike.models.Hike;
+import com.example.m_hike.models.Observation;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,6 +32,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(DIFFICULTY.DifficultyEntry.CREATE_QUERY);
         db.execSQL(HIKE.HikeEntry.CREATE_QUERY);
+        db.execSQL(OBSERVATION.ObservationEntry.CREATE_QUERY);
         Log.d("Create Query", HIKE.HikeEntry.TABLE_NAME);
         Log.d("Database", "Created");
         seedDifficulties(db);
@@ -41,6 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP table IF EXISTS " + HIKE.HikeEntry.TABLE_NAME);
         db.execSQL("DROP table IF EXISTS " + DIFFICULTY.DifficultyEntry.TABLE_NAME);
+        db.execSQL("DROP table IF EXISTS " + OBSERVATION.ObservationEntry.TABLE_NAME);
         seedDifficulties(db);
         Log.w(this.getClass().getName(), db + " database upgrade to version " + newVersion);
 
@@ -61,7 +64,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, new Difficulty(difficulty, null));
     }
-
     public ArrayList<Hike> getHikes() throws ParseException {
         String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, difficulties.id, difficulties.name FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id ORDER BY strftime('%s', hikes.date) DESC";
         Cursor res = database.rawQuery(query , null);
@@ -121,5 +123,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return difficultiesList;
     }
+    public Observation insertObservation(String caption, Date date, byte[] image, double longitude, double latitude, Hike hike) throws ParseException {
+        ContentValues rowValues = new ContentValues(); // new row object
+        rowValues.put(OBSERVATION.ObservationEntry.CAPTION_COLUMN_NAME, caption);
+        rowValues.put(OBSERVATION.ObservationEntry.OBSERVATION_COLUMN_NAME, image);
+        rowValues.put(OBSERVATION.ObservationEntry.DATE_COLUMN_NAME, date.toString());
+        rowValues.put(OBSERVATION.ObservationEntry.HIKE_ID_COLUMN_NAME, hike.getId());
+        rowValues.put(OBSERVATION.ObservationEntry.LATITUDE_COLUMN_NAME, latitude);
+        rowValues.put(OBSERVATION.ObservationEntry.LONGITUDE_COLUMN_NAME, longitude);
 
+        long res = database.insertOrThrow(OBSERVATION.ObservationEntry.TABLE_NAME, null, rowValues);
+
+        return new Observation((int) res, caption, date.toString(), image, longitude, latitude, hike);
+    }
 }

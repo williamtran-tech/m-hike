@@ -39,8 +39,10 @@ import android.widget.Toast;
 import com.example.m_hike.R;
 import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.models.Hike;
+import com.example.m_hike.services.LocationAddress;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -53,6 +55,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
 
 public class AddFragment extends Fragment {
     private DatabaseHelper dbHelper;
@@ -96,19 +99,19 @@ public class AddFragment extends Fragment {
         );
         ImageView locationBtn = (ImageView) addFragmentView.findViewById(R.id.locationImg);
         locationBtn.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
                 try {
                     if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
                         ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 101);
+                        requestPermissions();
                     }
                 } catch (Exception e){
                     e.printStackTrace();
                 }
-                Float[] coordinates = getLastLocation();
-                Log.d("location", "onClick: " + coordinates[0] + " " + coordinates[1]);
-                EditText locationTxt = getActivity().findViewById(R.id.locationEditTxt);
-                locationTxt.setText("Latitude:" + coordinates[0] + ", longitude:" + coordinates[1]);
+                requestNewLocationData();
+                getLastLocation();
             }
         });
 
@@ -126,25 +129,6 @@ public class AddFragment extends Fragment {
 
         BottomNavigationView navBar = getActivity().findViewById(R.id.bottomNavigationView);
         navBar.setVisibility(View.GONE);
-        // Hot fix
-//        EditText duration = (EditText) addFragmentView.findViewById(R.id.durationEditTxt);
-//        duration.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                BottomNavigationView navBar = getActivity().findViewById(R.id.bottomNavigationView);
-//                navBar.setVisibility(View.GONE);
-//            }
-//        });
-//
-//        EditText distance = (EditText) addFragmentView.findViewById(R.id.distanceEditTxt);
-//        distance.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                BottomNavigationView navBar = getActivity().findViewById(R.id.bottomNavigationView);
-//                navBar.setVisibility(View.GONE);
-//            }
-//        });
-
 
         // Change opacity of the background image when scroll
         ImageView background = (ImageView) addFragmentView.findViewById(R.id.imageView);
@@ -242,14 +226,13 @@ public class AddFragment extends Fragment {
 
 //    LOCATION
     @SuppressLint("MissingPermission")
-    private Float[] getLastLocation() {
-        Float[] coordinates = new Float[2];
+    private void getLastLocation() {
+
         // check if permissions are given
         if (checkPermissions()) {
 
             // check if location is enabled
             if (isLocationEnabled()) {
-
                 // getting last
                 // location from
                 // FusedLocationClient
@@ -262,8 +245,16 @@ public class AddFragment extends Fragment {
                             requestNewLocationData();
                         } else {
                             Log.d("location", "Lat: " + location.getLatitude() + " Long: " + location.getLongitude());
-                            coordinates[0] = ((float) location.getLatitude());
-                            coordinates[1] = ((float) location.getLongitude());
+                            // Get the address from the coordinates
+                            String address = LocationAddress.getAddressFromLocation(getActivity().getBaseContext(), location.getLatitude(), location.getLongitude());
+                            if (address != null) {
+                                EditText locationTxt = getActivity().findViewById(R.id.locationEditTxt);
+                                locationTxt.setText(address);
+                            } else {
+                                Toast.makeText(getActivity(), "Address not found", Toast.LENGTH_SHORT).show();
+                            }
+//                            EditText locationTxt = getActivity().findViewById(R.id.locationEditTxt);
+//                            locationTxt.setText("Latitude:" + coordinates[0] + ", longitude:" + coordinates[1]);
                         }
                     }
                 });
@@ -277,8 +268,6 @@ public class AddFragment extends Fragment {
             // request for permissions
             requestPermissions();
         }
-
-        return coordinates;
     }
 
     @SuppressLint("MissingPermission")

@@ -30,7 +30,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
-
+    Fragment currentFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
 //            fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
         transaction.replace(R.id.fragment_container, fragment);
         transaction.addToBackStack(null); // Add this transaction to the back stack.
-
+        currentFragment = fragment;
         transaction.commit();
     }
 
@@ -111,14 +111,23 @@ public class MainActivity extends AppCompatActivity {
 //        compassHandler.stop();
     }
 
+    private Integer backCount = 0;
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            // If there are fragments in the back stack, pop the back stack.
-            getSupportFragmentManager().popBackStack();
-        } else {
-            // If there are no fragments in the back stack, let the default behavior exit the app.
-            super.onBackPressed();
+            if (currentFragment instanceof HomeFragment) {
+                backCount++;
+                if (backCount == 2) {
+                    finish();
+                } else {
+                    Log.d("Back CLMM: ", currentFragment.toString());
+                    Toast.makeText(this, "Press again to exit", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                backCount = 0;
+                getSupportFragmentManager().popBackStack();
+                currentFragment = new HomeFragment();
+            }
         }
     }
 

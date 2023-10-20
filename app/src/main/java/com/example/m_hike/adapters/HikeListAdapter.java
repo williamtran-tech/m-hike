@@ -64,8 +64,8 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
 
         nameTxt.setText(hike.getName());
         locationTxt.setText(hike.getLocation());
-        duration.setText(hike.getDuration().toString());
-        distance.setText(hike.getDistance().toString());
+        duration.setText(hike.getDuration().toString() + " h");
+        distance.setText(hike.getDistance().toString() + " km");
         ratingChip.setText(hike.getDifficulty().getName());
         switch (hike.getDifficulty().getId()) {
             case 1:
@@ -90,7 +90,7 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
                 break;
         }
         String outputDate = "";
-            SimpleDateFormat inputFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+        SimpleDateFormat inputFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
         Date date1 = null;
         try {
             date1 = inputFormat.parse(hike.getDate().toString());
@@ -107,6 +107,16 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context, HikeDetailsActivity.class);
+                intent.putExtra("hikeId", hike.getId());
+                intent.putExtra("name", hike.getName());
+                intent.putExtra("location", hike.getLocation());
+                intent.putExtra("date", hike.getDate().toString());
+                intent.putExtra("availableParking", hike.isAvailableParking());
+                intent.putExtra("duration", hike.getDuration());
+                intent.putExtra("distance", hike.getDistance());
+                intent.putExtra("diffId", hike.getDifficulty().getId());
+                intent.putExtra("diffName", hike.getDifficulty().getName());
+                intent.putExtra("diffColor", ratingChip.getChipBackgroundColor());
                 view.getContext().startActivity(intent);
             }
         });
