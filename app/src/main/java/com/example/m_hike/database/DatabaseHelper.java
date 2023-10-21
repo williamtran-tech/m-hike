@@ -18,14 +18,14 @@ import java.util.Date;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "m_hike.db";
     // Built-in class for representing db manipulation
-    private final SQLiteDatabase database;
+    private static SQLiteDatabase database;
     public final SQLiteDatabase getDatabase(){
-        return this.database;
+        return database;
     }
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
-        this.database = getWritableDatabase();
+        database = getWritableDatabase();
     }
 
     @Override
@@ -62,12 +62,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         long res = database.insertOrThrow(HIKE.HikeEntry.TABLE_NAME, null, rowValues);
 
-        return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, new Difficulty(difficulty, null));
+        return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, new Difficulty(difficulty, null), null);
     }
-    public ArrayList<Hike> getHikes() throws ParseException {
+    public static ArrayList<Hike> getHikes() throws ParseException {
         String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, difficulties.id, difficulties.name FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id ORDER BY strftime('%s', hikes.date) DESC";
         Cursor res = database.rawQuery(query , null);
-        String resultText = "";
         ArrayList<Hike> hikesList = new ArrayList<Hike>();
 
         if (res.moveToFirst()) {
@@ -83,18 +82,52 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String difficultyName = res.getString(8);
                 Difficulty difficulty = new Difficulty(difficultyId, difficultyName);
 //          Integer id, String name, String location, String date, boolean availableParking, Float duration, Float distance, Difficulty difficulty
-                Hike hike = new Hike(id, name, location, date, parkingAvailable, duration, distance, difficulty);
+                Hike hike = new Hike(id, name, location, date, parkingAvailable, duration, distance, difficulty, null);
                 hikesList.add(hike);
             } while (res.moveToNext());
         }
         res.close();
         return hikesList;
     }
-    public Hike getHike(Integer id) throws ParseException {
-        String query = "SELECT * FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE hikes.id = " + id;
+    public static Hike updateHike(Integer id, String name, Date date, String location, boolean availableParking, Float duration, Float distance, Difficulty difficulty, String description) throws ParseException {
+        ContentValues rowValues = new ContentValues(); // new row object
+        rowValues.put(HIKE.HikeEntry.NAME_COLUMN_NAME, name);
+        rowValues.put(HIKE.HikeEntry.DATE_COLUMN_NAME, date.toString());
+        rowValues.put(HIKE.HikeEntry.LOCATION_COLUMN_NAME, location);
+        rowValues.put(HIKE.HikeEntry.AVAILABLE_PARKING_COLUMN_NAME, availableParking);
+        rowValues.put(HIKE.HikeEntry.DIFFICULTY_COLUMN_NAME, difficulty.getId());
+        rowValues.put(HIKE.HikeEntry.DURATION_COLUMN_NAME, duration);
+        rowValues.put(HIKE.HikeEntry.DISTANCE_COLUMN_NAME, distance);
+        rowValues.put(HIKE.HikeEntry.DESCRIPTION_COLUMN_NAME, description);
+
+        long res = database.update(HIKE.HikeEntry.TABLE_NAME, rowValues, "id = " + id, null);
+
+        return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, difficulty, description);
+    }
+    public static Hike getHike(Integer id) throws ParseException {
+        String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, hikes.difficultyId, difficulties.name, hikes.description  FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE hikes.id = " + id;
         Cursor res = database.rawQuery(query , null);
-        Hike hike = new Hike(res.getInt(0), res.getString(1), res.getString(2), res.getString(3), res.getInt(4) == 1, res.getFloat(5), res.getFloat(6), new Difficulty(res.getInt(7), res.getString(8)));
-        res.close();
+        Cursor cursor = res;// Your cursor object
+
+        Hike hike = null;
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                // Now, the cursor is positioned at the first row
+                // Set the values
+                int hikeId = res.getInt(0);
+                String name = res.getString(1);
+                String location = res.getString(2);
+                String date = res.getString(3);
+                boolean parkingAvailable = res.getInt(4) == 1;
+                Float duration = res.getFloat(5);
+                Float distance = res.getFloat(6);
+                Difficulty difficulty = new Difficulty(res.getInt(7), res.getString(8));
+                String description = res.getString(9);
+
+                hike = new Hike(hikeId, name, location, date, parkingAvailable, duration, distance, difficulty, description);
+            }
+            cursor.close(); // Don't forget to close the cursor when you're done with it
+        }
         return hike;
     }
     private void seedDifficulties(SQLiteDatabase db) {

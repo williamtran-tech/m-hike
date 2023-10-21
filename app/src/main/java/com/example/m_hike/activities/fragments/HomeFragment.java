@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.m_hike.R;
@@ -79,7 +80,9 @@ public class HomeFragment extends Fragment {
                 searchHike.setVisibility(View.VISIBLE);
                 // Set layout manager this RecyclerView will use
                 RecyclerView recyclerView = homeFragmentView.findViewById(R.id.hikeRecyclerView);
+
 //                recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+//                recyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
                 recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
                 recyclerView.setAdapter(hikeAdapter);
 

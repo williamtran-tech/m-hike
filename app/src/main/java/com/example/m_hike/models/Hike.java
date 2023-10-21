@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Hike {
+    private String description;
     private int id;
     private String name;
     private String location;
@@ -45,8 +46,11 @@ public class Hike {
     public Difficulty getDifficulty() {
         return difficulty;
     }
+    public String getDescription() {
+        return description;
+    }
 
-    public Hike(Integer id, String name, String location, String date, boolean availableParking, Float duration, Float distance, Difficulty difficulty) throws ParseException {
+    public Hike(Integer id, String name, String location, String date, boolean availableParking, Float duration, Float distance, Difficulty difficulty, String description) throws ParseException {
         this.id = id;
         this.name = name;
         this.location = location;
@@ -57,9 +61,10 @@ public class Hike {
         this.duration = duration;
         this.distance = distance;
         this.difficulty = difficulty;
+        this.description = description;
     }
 
-    public void updateHike(String name, String location, Date date, boolean availableParking, Float duration, Float distance, Difficulty difficulty) {
+    public void updateHike(String name, String location, Date date, boolean availableParking, Float duration, Float distance, Difficulty difficulty, String description) {
         this.name = name;
         this.location = location;
         this.date = date;
@@ -67,6 +72,7 @@ public class Hike {
         this.duration = duration;
         this.distance = distance;
         this.difficulty = difficulty;
+        this.description = description;
     }
 
 }

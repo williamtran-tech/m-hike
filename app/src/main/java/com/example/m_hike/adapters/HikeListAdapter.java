@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import com.example.m_hike.activities.HikeDetailsActivity;
 import com.example.m_hike.activities.MainActivity;
 import com.example.m_hike.activities.fragments.SettingFragment;
 import com.example.m_hike.activities.intro.IntroActivity;
+import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.models.Hike;
 import com.google.android.material.chip.Chip;
 
@@ -117,6 +119,19 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
                 intent.putExtra("diffId", hike.getDifficulty().getId());
                 intent.putExtra("diffName", hike.getDifficulty().getName());
                 intent.putExtra("diffColor", ratingChip.getChipBackgroundColor());
+
+                Hike hike1;
+                try {
+                    hike1 = DatabaseHelper.getHike(hike.getId());
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                if (hike1.getDescription() == null || hike1.getDescription().isEmpty()) {
+                    intent.putExtra("description", "");
+                    Log.d("Empty", "Empty");
+                } else {
+                    intent.putExtra("description", hike1.getDescription());
+                }
                 view.getContext().startActivity(intent);
             }
         });

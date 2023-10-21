@@ -3,12 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:layout_marginStart="5dp"
+    android:layout_marginEnd="5dp"
     android:layout_marginTop="10dp">
     <androidx.cardview.widget.CardView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" app:cardCornerRadius="10dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -30,9 +32,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="14dp"
                 android:layout_marginTop="20dp"
-                android:maxLength="20"
+                android:maxLines="2"
                 android:text="Hike Name"
-                android:textAlignment="center"
+                android:textAlignment="textStart"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -41,8 +43,8 @@
             <!-- Hike Location -->
             <ImageView
                 android:id="@+id/locationIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="29dp"
+                android:layout_height="29dp"
                 android:layout_marginStart="10dp"
                 android:src="@drawable/baseline_location_on_24"
                 app:layout_constraintBottom_toBottomOf="@+id/location"
@@ -52,23 +54,25 @@
 
             <TextView
                 android:id="@+id/location"
-                android:layout_width="370dp"
-                android:layout_height="45dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
                 android:layout_marginStart="5dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="14dp"
                 android:maxLines="2"
-                android:gravity="center_vertical"
-                android:text="Location lomng asd asd asd asd asd asd asdasdasdasd"
-                android:paddingEnd="10dp"
+                android:paddingEnd="5dp"
+                android:text="The vertical alignment can also be influenced by the constraints applied"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.012"
+                app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintStart_toEndOf="@+id/locationIcon"
-                app:layout_constraintTop_toBottomOf="@+id/name" />
-
+                app:layout_constraintTop_toBottomOf="@+id/name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constrainedWidth="true"
+                />
             <!-- Hike Duration -->
+
             <ImageView
                 android:id="@+id/durationIcon"
                 android:layout_width="29dp"
@@ -81,10 +85,10 @@
                 tools:ignore="MissingConstraints" />
             <TextView
                 android:id="@+id/durationTxt"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="14dp"
                 android:gravity="center_vertical"
                 android:text="Time duration"
                 android:textSize="10sp"
@@ -92,7 +96,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/location" />
             <TextView
                 android:id="@+id/duration"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:gravity="center_vertical"
@@ -116,9 +120,9 @@
                 tools:ignore="MissingConstraints" />
             <TextView
                 android:id="@+id/distanceTxt"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="14dp"
                 android:layout_marginStart="5dp"
                 android:gravity="center_vertical"
                 android:text="Distance"
@@ -128,7 +132,7 @@
 
             <TextView
                 android:id="@+id/distance"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:text="5 km"
@@ -153,12 +157,13 @@
 
             <TextView
                 android:id="@+id/date"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginTop="14dp"
                 android:text="January 1, 2023"
                 android:textSize="14sp"
+                android:textColor="@color/black"
                 app:layout_constraintStart_toEndOf="@id/dateIcon"
                 app:layout_constraintTop_toBottomOf="@+id/duration" />
 
