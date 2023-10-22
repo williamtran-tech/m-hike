@@ -65,7 +65,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, new Difficulty(difficulty, null), null);
     }
     public static ArrayList<Hike> getHikes() throws ParseException {
-        String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, difficulties.id, difficulties.name FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id ORDER BY strftime('%s', hikes.date) DESC";
+        String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, difficulties.id, difficulties.name FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE deletedAt IS NULL ORDER BY strftime('%s', hikes.date) DESC";
         Cursor res = database.rawQuery(query , null);
         ArrayList<Hike> hikesList = new ArrayList<Hike>();
 
@@ -156,17 +156,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return difficultiesList;
     }
-    public Observation insertObservation(String caption, Date date, byte[] image, double longitude, double latitude, Hike hike) throws ParseException {
+    public Observation insertObservation(String caption, Date date, byte[] image, double longitude, double latitude, Integer hikeId) throws ParseException {
         ContentValues rowValues = new ContentValues(); // new row object
         rowValues.put(OBSERVATION.ObservationEntry.CAPTION_COLUMN_NAME, caption);
         rowValues.put(OBSERVATION.ObservationEntry.OBSERVATION_COLUMN_NAME, image);
         rowValues.put(OBSERVATION.ObservationEntry.DATE_COLUMN_NAME, date.toString());
-        rowValues.put(OBSERVATION.ObservationEntry.HIKE_ID_COLUMN_NAME, hike.getId());
+        rowValues.put(OBSERVATION.ObservationEntry.HIKE_ID_COLUMN_NAME, hikeId);
         rowValues.put(OBSERVATION.ObservationEntry.LATITUDE_COLUMN_NAME, latitude);
         rowValues.put(OBSERVATION.ObservationEntry.LONGITUDE_COLUMN_NAME, longitude);
 
         long res = database.insertOrThrow(OBSERVATION.ObservationEntry.TABLE_NAME, null, rowValues);
 
-        return new Observation((int) res, caption, date.toString(), image, longitude, latitude, hike);
+        return new Observation((int) res, caption, date.toString(), image, longitude, latitude, hikeId);
     }
 }

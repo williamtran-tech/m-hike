@@ -1,5 +1,9 @@
 package com.example.m_hike.models;
 
+import android.graphics.Bitmap;
+
+import com.example.m_hike.database.DatabaseHelper;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -69,8 +73,14 @@ public class Observation {
     private double latitude;
     private double longitude;
 
+    public Date getDeletedAt() {
+        return deletedAt;
+    }
 
-    public Observation(Integer id, String name, String date, byte[] image, double longitude, double latitude, Hike hike) throws ParseException {
+    private Date deletedAt;
+
+
+    public Observation(Integer id, String name, String date, byte[] image, double longitude, double latitude, Integer hikeId) throws ParseException {
         this.id = id;
         this.caption = name;
         // Use the correct date format
@@ -79,7 +89,7 @@ public class Observation {
         this.image = image;
         this.longitude = longitude;
         this.latitude = latitude;
-        this.hike = hike;
+        this.hike = DatabaseHelper.getHike(hikeId);
     }
 
 }

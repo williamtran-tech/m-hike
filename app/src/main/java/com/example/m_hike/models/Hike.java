@@ -14,6 +14,12 @@ public class Hike {
     private Float duration;
     private Float distance;
     private Difficulty difficulty;
+    private Date deletedAt;
+
+    public Date getDeletedAt() {
+        return deletedAt;
+    }
+
 
     public int getId() {
         return id;

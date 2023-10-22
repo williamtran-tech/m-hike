@@ -45,146 +45,206 @@
                 android:textStyle="bold"/>
         </LinearLayout>
 
-        <ScrollView
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        tools:ignore="MissingConstraints">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar"
-            tools:ignore="MissingConstraints">
+            android:layout_height="wrap_content">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <include
+                android:id="@+id/hikeDetails"
+                layout="@layout/hike_item"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="?attr/actionBarSize"
+                android:layout_marginEnd="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/additionalInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                app:cardCornerRadius="5dp"
+                app:layout_constraintTop_toBottomOf="@id/hikeDetails"
+                tools:ignore="MissingConstraints">
 
-                <include
-                    android:id="@+id/hikeDetails"
-                    layout="@layout/hike_item"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="?attr/actionBarSize"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"/>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/additionalInfo"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    app:cardCornerRadius="5dp"
-                    app:layout_constraintTop_toBottomOf="@id/hikeDetails"
-                    tools:ignore="MissingConstraints">
+                    android:layout_marginBottom="10dp">
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
+                    <TextView
+                        android:id="@+id/descriptionTxt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="5dp"
+                        android:text="Description"
+                        android:textSize="10sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <EditText
+                        android:id="@+id/descriptionEditTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp">
+                        android:layout_margin="5dp"
+                        android:background="@drawable/edit_txt"
+                        android:hint="@string/descriptionHint"
+                        android:inputType="textShortMessage|textMultiLine"
+                        android:maxLines="5"
+                        android:padding="10dp"
+                        android:scrollbars="vertical"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/buttonStroke"
+                        android:textSize="16sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/descriptionTxt" />
 
-                        <TextView
-                            android:id="@+id/descriptionTxt"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:layout_marginTop="5dp"
-                            android:text="Description"
-                            android:textSize="10sp"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/saveDescriptionBtn"
+                        android:layout_width="70dp"
+                        android:layout_height="30dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="5dp"
+                        android:background="@drawable/round_corner"
+                        android:text="Submit"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/descriptionEditTxt" />
 
-                        <EditText
-                            android:id="@+id/descriptionEditTxt"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:background="@drawable/edit_txt"
-                            android:hint="@string/descriptionHint"
-                            android:inputType="textShortMessage|textMultiLine"
-                            android:maxLines="5"
-                            android:padding="10dp"
-                            android:scrollbars="vertical"
-                            android:textColor="@color/black"
-                            android:textColorHint="@color/buttonStroke"
-                            android:textSize="16sp"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@+id/descriptionTxt" />
+                    <TextView
+                        android:id="@+id/description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="10dp"
+                        android:ems="10"
+                        android:inputType="textMultiLine"
+                        android:text="Sample text"
+                        android:textSize="16sp"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/descriptionEditTxt" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
-                        <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/saveDescriptionBtn"
-                            android:layout_width="70dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginEnd="5dp"
-                            android:background="@drawable/background_btn"
-                            android:text="Submit"
-                            android:visibility="gone"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            app:layout_constraintTop_toBottomOf="@+id/descriptionEditTxt"
-                            app:layout_constraintEnd_toEndOf="parent"/>
+            </androidx.cardview.widget.CardView>
 
-                        <TextView
-                            android:id="@+id/description"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:inputType="textMultiLine"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginStart="12dp"
-                            android:textSize="16sp"
-                            android:text="Sample text"
-                            android:visibility="gone"
-                            app:layout_constraintTop_toBottomOf="@+id/descriptionEditTxt"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"/>
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.cardview.widget.CardView
+                android:id="@+id/observationFields"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                app:cardCornerRadius="5dp"
+                app:layout_constraintTop_toBottomOf="@id/additionalInfo"
+                tools:ignore="MissingConstraints">
 
-                </androidx.cardview.widget.CardView>
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/captureBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="10dp"
-                    android:background="@drawable/background_btn"
-                    android:padding="10dp"
-                    android:text="Chụp hình cái nhẹ nè"
-                    android:textColor="@color/white"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="1.0"
-                    app:layout_constraintTop_toTopOf="@+id/galleryBtn"
-                    tools:ignore="MissingConstraints" />
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/galleryBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/background_btn"
-                    android:padding="10dp"
-                    android:text="Lấy hình cái nhẹ nè"
-                    android:textColor="@color/white"
-                    app:layout_constraintHorizontal_bias="0.069"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/additionalInfo"
-                    tools:ignore="MissingConstraints" />
-
-                <ImageView
-                    android:id="@+id/imageView"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:scaleType="fitStart"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/galleryBtn"
-                    tools:ignore="MissingConstraints" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </ScrollView>
+                    <TextView
+                        android:id="@+id/observationTxt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="5dp"
+                        android:text="Observations"
+                        android:textSize="10sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <EditText
+                        android:id="@+id/observationEditTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/edit_txt"
+                        android:hint="@string/observationHint"
+                        android:inputType="textShortMessage|textMultiLine"
+                        android:maxLines="5"
+                        android:padding="10dp"
+                        android:scrollbars="vertical"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/buttonStroke"
+                        android:textSize="16sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/observationTxt" />
+
+                    <ImageButton
+                        android:id="@+id/captureBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/image_gallery_btn"
+                        android:padding="5dp"
+                        android:src="@drawable/baseline_photo_camera_24"
+                        android:visibility="gone"
+                        app:layout_constraintCircleRadius="10dp"
+                        app:layout_constraintEnd_toStartOf="@id/saveObservationBtn"
+                        app:layout_constraintTop_toBottomOf="@id/observationEditTxt" />
+
+                    <ImageButton
+                        android:id="@+id/galleryBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/image_gallery_btn"
+                        android:padding="5dp"
+                        android:src="@drawable/baseline_photo_library_24"
+                        android:textColor="@color/white"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toStartOf="@id/captureBtn"
+                        app:layout_constraintTop_toBottomOf="@+id/observationEditTxt" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/saveObservationBtn"
+                        android:layout_width="70dp"
+                        android:layout_height="30dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="5dp"
+                        android:background="@drawable/round_corner"
+                        android:text="Save"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/observationEditTxt" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <LinearLayout
+                android:id="@+id/observationList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:orientation="vertical"
+                android:layout_marginTop="5dp"
+                app:layout_constraintTop_toBottomOf="@id/observationFields">
+
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

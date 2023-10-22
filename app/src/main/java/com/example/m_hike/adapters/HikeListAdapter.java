@@ -4,25 +4,18 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.RatingBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.m_hike.R;
 import com.example.m_hike.activities.HikeDetailsActivity;
-import com.example.m_hike.activities.MainActivity;
-import com.example.m_hike.activities.fragments.SettingFragment;
-import com.example.m_hike.activities.intro.IntroActivity;
 import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.models.Hike;
 import com.google.android.material.chip.Chip;
@@ -31,7 +24,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.zip.Inflater;
 
 public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHolder> {
     private final ArrayList<Hike> hikeList;

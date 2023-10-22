@@ -9,4 +9,5 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="descriptionHint"><i>Say something about this trip...</i></string>
+    <string name="observationHint"><i>Save observations in this trip...</i></string>
 </resources>

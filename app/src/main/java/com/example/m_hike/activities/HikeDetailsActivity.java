@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,7 +22,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,8 +32,10 @@ import com.example.m_hike.R;
 import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.models.Difficulty;
 import com.example.m_hike.models.Hike;
+import com.example.m_hike.models.Observation;
 import com.google.android.material.chip.Chip;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -53,26 +58,7 @@ public class HikeDetailsActivity extends AppCompatActivity {
         displayHikeDetails();
 
         updateDescription();
-
-        AppCompatButton captureBtn = findViewById(R.id.captureBtn);
-        AppCompatButton galleryBtn = findViewById(R.id.galleryBtn);
-        captureBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Open camera
-                askCameraPermission();
-            }
-        });
-
-        galleryBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Open gallery
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_IMAGE);
-            }
-        });
+        updateObservation();
 
         ImageView backBtn = findViewById(R.id.backBtn);
         backBtn.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +90,7 @@ public class HikeDetailsActivity extends AppCompatActivity {
                 dispatchTakePictureIntent();
             } else {
                 // Permission denied
-                Toast.makeText(this, "Camera permission is Required", Toast.LENGTH_SHORT - 300).show();
+                Toast.makeText(this, "Cancel", Toast.LENGTH_SHORT - 300).show();
             }
         }
     }
@@ -116,8 +102,6 @@ public class HikeDetailsActivity extends AppCompatActivity {
                 File file = new File(currentPhotoPath);
 
                 Toast.makeText(this, "Image Captured", Toast.LENGTH_SHORT - 300).show();
-                ImageView imageView = findViewById(R.id.imageView);
-                imageView.setImageURI(Uri.fromFile(file));
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "Camera permission is Required", Toast.LENGTH_SHORT - 300).show();
             }
@@ -170,6 +154,8 @@ public class HikeDetailsActivity extends AppCompatActivity {
                 Uri photoURI = FileProvider.getUriForFile(this,
                         "com.example.m_hike.fileprovider",
                         photoFile);
+                AppCompatButton saveObservationBtn = findViewById(R.id.saveObservationBtn);
+                saveObservationBtn.setVisibility(View.VISIBLE);
 
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
@@ -315,5 +301,129 @@ public class HikeDetailsActivity extends AppCompatActivity {
                 saveDescriptionBtn.setVisibility(View.GONE);
             }
         });
+    }
+
+    private void updateObservation() {
+        EditText observation = findViewById(R.id.observationEditTxt);
+        ImageButton captureBtn = findViewById(R.id.captureBtn);
+        ImageButton galleryBtn = findViewById(R.id.galleryBtn);
+        AppCompatButton saveObservationBtn = findViewById(R.id.saveObservationBtn);
+
+        captureBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Open camera
+                askCameraPermission();
+            }
+        });
+
+        galleryBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Open gallery
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_IMAGE);
+            }
+        });
+
+        observation.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Scroll the screen to the bottom
+                observation.scrollTo(0, observation.getBottom());
+                saveObservationBtn.setVisibility(View.GONE);
+                captureBtn.setVisibility(View.VISIBLE);
+                galleryBtn.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                saveObservationBtn.setVisibility(View.VISIBLE);
+                if (s.length() == 0) {
+                    saveObservationBtn.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+        saveObservationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Save observation
+                observation.clearFocus();
+
+                // TODO: Save to the database
+
+                Log.d("HikeId", String.valueOf(hikeId));
+
+                // Create / Update observation
+                // Hide the keyboard
+                if (currentPhotoPath != null) {
+                    File file = new File(currentPhotoPath);
+                    byte[] image = new byte[(int) file.length()];
+                    saveObservation(observation.getText().toString(), image);
+                } else {
+                    saveObservation(observation.getText().toString(), null);
+                }
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                observation.setVisibility(View.VISIBLE);
+                captureBtn.setVisibility(View.GONE);
+                galleryBtn.setVisibility(View.GONE);
+                saveObservationBtn.setVisibility(View.GONE);
+                imm.hideSoftInputFromWindow(observation.getWindowToken(), 0);
+                Toast.makeText(HikeDetailsActivity.this, "Description saved", Toast.LENGTH_SHORT - 500).show();
+            }
+        });
+    }
+
+    private void saveObservation(String caption, byte[] image) {
+        // Save observation
+        Log.d("HikeId", String.valueOf(hikeId));
+        Log.d("Caption", caption);
+
+        // TODO: Save to the database
+        if (image != null) {
+            Log.d("Image", image.toString());
+        }
+
+        // Display the observation
+//        ArrayList<Observation> observationList = null;
+////        TODO: Get observations from the database
+        LinearLayout observationList = findViewById(R.id.observationList);
+        View observationView = getLayoutInflater().inflate(R.layout.observation_item, null);
+        TextView captionTxt = observationView.findViewById(R.id.caption);
+        captionTxt.setText(caption);
+        ImageView observationPicture = observationView.findViewById(R.id.observationPicture);
+        if (image != null) {
+            // Change size of the image
+            // from byte[] to Bitmap
+            Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+            observationPicture.setImageBitmap(bitmap);
+//            observationPicture.setImageURI(Uri.parse(currentPhotoPath));
+        }
+        observationList.addView(observationView);
+
+////        try {
+////            observationList = DatabaseHelper.getObservations(hikeId);
+////        } catch (ParseException e) {
+////            throw new RuntimeException(e);
+////        }
+//        Date date = new SimpleDateFormat("yyyy-MM-dd").getCalendar().getTime();
+//        try {
+//            observationList.add(new Observation(1, caption, date.toString(), null, 0, 0, null));
+//        } catch (ParseException e) {
+//            throw new RuntimeException(e);
+//        }
+
+//        RecyclerView observationRecyclerView = findViewById(R.id.observationRecyclerView);
+//        ObservationListAdapter observationListAdapter = new ObservationListAdapter(this, observationList);
+//        observationRecyclerView.setLayoutManager(new LinearLayoutManager(requiredContext()));
+//        observationRecyclerView.setAdapter(observationListAdapter);
+
     }
 }
