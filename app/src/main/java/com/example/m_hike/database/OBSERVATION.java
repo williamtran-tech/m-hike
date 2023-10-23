@@ -15,7 +15,7 @@ public final class OBSERVATION {
         public static final String HIKE_ID_COLUMN_NAME = "hike_id";
         public static final String LATITUDE_COLUMN_NAME = "latitude";
         public static final String LONGITUDE_COLUMN_NAME = "longitude";
-        public static final String DELETEDAT = "deletedAt";
+        public static final String DELETEDAT_COLUMN_NAME = "deletedAt";
 
         public static final String CREATE_QUERY = String.format(
                 "CREATE TABLE IF NOT EXISTS %s (" +
@@ -27,7 +27,7 @@ public final class OBSERVATION {
                         "%s INTEGER, %s INTEGER, " +
                         "%s TEXT, " +
                         "FOREIGN KEY (%s) REFERENCES hikes(id)" +
-                        ")", ObservationEntry.TABLE_NAME, ObservationEntry.ID_COLUMN_NAME, ObservationEntry.CAPTION_COLUMN_NAME, ObservationEntry.OBSERVATION_COLUMN_NAME, ObservationEntry.DATE_COLUMN_NAME, ObservationEntry.HIKE_ID_COLUMN_NAME, ObservationEntry.LATITUDE_COLUMN_NAME, ObservationEntry.LONGITUDE_COLUMN_NAME, ObservationEntry.DELETEDAT, ObservationEntry.HIKE_ID_COLUMN_NAME
+                        ")", ObservationEntry.TABLE_NAME, ObservationEntry.ID_COLUMN_NAME, ObservationEntry.CAPTION_COLUMN_NAME, ObservationEntry.OBSERVATION_COLUMN_NAME, ObservationEntry.DATE_COLUMN_NAME, ObservationEntry.HIKE_ID_COLUMN_NAME, ObservationEntry.LATITUDE_COLUMN_NAME, ObservationEntry.LONGITUDE_COLUMN_NAME, ObservationEntry.DELETEDAT_COLUMN_NAME, ObservationEntry.HIKE_ID_COLUMN_NAME
         );
         public static String getObservations() {
             return "SELECT * FROM " + OBSERVATION.ObservationEntry.TABLE_NAME;

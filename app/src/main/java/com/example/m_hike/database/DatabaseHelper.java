@@ -65,7 +65,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, new Difficulty(difficulty, null), null);
     }
     public static ArrayList<Hike> getHikes() throws ParseException {
-        String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, difficulties.id, difficulties.name FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE deletedAt IS NULL ORDER BY strftime('%s', hikes.date) DESC";
+        String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, difficulties.id, difficulties.name FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE deletedAt IS NULL ORDER BY hikes.date DESC";
         Cursor res = database.rawQuery(query , null);
         ArrayList<Hike> hikesList = new ArrayList<Hike>();
 
@@ -156,7 +156,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return difficultiesList;
     }
-    public Observation insertObservation(String caption, Date date, byte[] image, double longitude, double latitude, Integer hikeId) throws ParseException {
+    public static Observation insertObservation(String caption, Date date, byte[] image, double longitude, double latitude, Integer hikeId) throws ParseException {
         ContentValues rowValues = new ContentValues(); // new row object
         rowValues.put(OBSERVATION.ObservationEntry.CAPTION_COLUMN_NAME, caption);
         rowValues.put(OBSERVATION.ObservationEntry.OBSERVATION_COLUMN_NAME, image);
@@ -168,5 +168,88 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         long res = database.insertOrThrow(OBSERVATION.ObservationEntry.TABLE_NAME, null, rowValues);
 
         return new Observation((int) res, caption, date.toString(), image, longitude, latitude, hikeId);
+    }
+
+    public static ArrayList<Observation> getObservations(Integer hikeId) {
+        String query = "SELECT observations.id, observations.caption, observations.date, observations.observation, observations.latitude, observations.longitude, observations.hike_id, hikes.name FROM observations INNER JOIN hikes ON observations.hike_id = hikes.id WHERE observations.deletedAt IS NULL AND observations.hike_id = " + hikeId + " ORDER BY observations.date DESC";
+        Cursor res = database.rawQuery(query , null);
+        ArrayList<Observation> observationsList = new ArrayList<Observation>();
+
+        if (res.moveToFirst()) {
+            do {
+                int id = res.getInt(0);
+                String caption = res.getString(1);
+                String date = res.getString(2);
+                byte[] image = res.getBlob(3);
+                double latitude = res.getDouble(4);
+                double longitude = res.getDouble(5);
+                int hId = res.getInt(6);
+                Observation observation = null;
+                try {
+                    observation = new Observation(id, caption, date, image, longitude, latitude, hikeId);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                observationsList.add(observation);
+            } while (res.moveToNext());
+        }
+        res.close();
+        return observationsList;
+    }
+    public static Observation getObservation(Integer id) {
+        ContentValues rowValues = new ContentValues(); // new row object
+        String query = "SELECT observations.id, observations.caption, observations.date, observations.observation, observations.latitude, observations.longitude, observations.hike_id, hikes.name FROM observations INNER JOIN hikes ON observations.hike_id = hikes.id WHERE observations.id = " + id;
+        Cursor cursor = database.rawQuery(query , null);
+        Observation observation = null;
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                // Now, the cursor is positioned at the first row
+                // Set the values
+                String caption = cursor.getString(1);
+                String date = cursor.getString(2);
+                byte[] image = cursor.getBlob(3);
+                double latitude = cursor.getDouble(4);
+                double longitude = cursor.getDouble(5);
+                int hikeId = cursor.getInt(6);
+
+                try {
+                    observation = new Observation(id, caption, date, image, longitude, latitude,  hikeId);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            cursor.close(); // Don't forget to close the cursor when you're done with it
+        }
+        return observation;
+
+    }
+    public static Observation deleteObservation(Integer id) {
+        ContentValues rowValues = new ContentValues(); // new row object
+        rowValues.put(OBSERVATION.ObservationEntry.DELETEDAT_COLUMN_NAME, new Date().toString());
+
+        long res = database.update(OBSERVATION.ObservationEntry.TABLE_NAME, rowValues, "id = " + id, null);
+
+        return getObservation(id);
+    }
+
+    public static Observation updateObservation(Integer id, String caption, Date date, byte[] image, double longitude, double latitude, Integer hikeId, Date deletedAt ) throws ParseException {
+        ContentValues rowValues = new ContentValues(); // new row object
+        Log.d("Date", date.toString());
+        if (deletedAt != null) {
+            Log.d("WTA", "ASd");
+            rowValues.put(OBSERVATION.ObservationEntry.DELETEDAT_COLUMN_NAME, deletedAt.toString());
+        } else {
+            rowValues.put(OBSERVATION.ObservationEntry.DELETEDAT_COLUMN_NAME, (String) null);
+        }
+        rowValues.put(OBSERVATION.ObservationEntry.CAPTION_COLUMN_NAME, caption);
+        rowValues.put(OBSERVATION.ObservationEntry.OBSERVATION_COLUMN_NAME, image);
+        rowValues.put(OBSERVATION.ObservationEntry.DATE_COLUMN_NAME, date.toString());
+        rowValues.put(OBSERVATION.ObservationEntry.HIKE_ID_COLUMN_NAME, hikeId);
+        rowValues.put(OBSERVATION.ObservationEntry.LATITUDE_COLUMN_NAME, latitude);
+        rowValues.put(OBSERVATION.ObservationEntry.LONGITUDE_COLUMN_NAME, longitude);
+
+        long res = database.update(OBSERVATION.ObservationEntry.TABLE_NAME, rowValues, "id = " + id, null);
+
+        return new Observation(id, caption, date.toString(), image, longitude, latitude, hikeId);
     }
 }

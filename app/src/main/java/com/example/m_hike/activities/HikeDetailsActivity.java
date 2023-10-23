@@ -2,29 +2,41 @@ package com.example.m_hike.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.DialogCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.fragment.app.DialogFragment;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +68,7 @@ public class HikeDetailsActivity extends AppCompatActivity {
 
         getSupportActionBar().hide();
         displayHikeDetails();
+        displayObservations();
 
         updateDescription();
         updateObservation();
@@ -102,6 +115,21 @@ public class HikeDetailsActivity extends AppCompatActivity {
                 File file = new File(currentPhotoPath);
 
                 Toast.makeText(this, "Image Captured", Toast.LENGTH_SHORT - 300).show();
+                // Show preview observation
+                Log.d("CurrentPhotoPath", currentPhotoPath);
+                if (currentPhotoPath != null) {
+                    // Show preview observation
+                    CardView observationPreview = findViewById(R.id.observationPreview);
+                    ImageView observationPicturePreview = findViewById(R.id.observationPicPreview);
+                    Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+                    Bitmap rotateImage = rotateImage(bitmap, 90);
+                    observationPicturePreview.setImageBitmap(rotateImage);
+                    observationPreview.setVisibility(View.VISIBLE);
+                    TextView caption = findViewById(R.id.observationCaptionPreview);
+                    EditText captionEdit = findViewById(R.id.observationEditTxt);
+                    caption.setText(captionEdit.getText().toString());
+
+                }
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "Camera permission is Required", Toast.LENGTH_SHORT - 300).show();
             }
@@ -134,6 +162,7 @@ public class HikeDetailsActivity extends AppCompatActivity {
 
         // Save a file: path for use with ACTION_VIEW intents
         currentPhotoPath = image.getAbsolutePath();
+
         return image;
     }
 
@@ -154,11 +183,12 @@ public class HikeDetailsActivity extends AppCompatActivity {
                 Uri photoURI = FileProvider.getUriForFile(this,
                         "com.example.m_hike.fileprovider",
                         photoFile);
-                AppCompatButton saveObservationBtn = findViewById(R.id.saveObservationBtn);
-                saveObservationBtn.setVisibility(View.VISIBLE);
 
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+
+                AppCompatButton saveObservationBtn = findViewById(R.id.saveObservationBtn);
+                saveObservationBtn.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -221,6 +251,115 @@ public class HikeDetailsActivity extends AppCompatActivity {
         difficulty.setTextColor(getColor(R.color.white));
 //        availableParkingTxt.setText(availableParking);
         dateTxt.setText(outputDate);;
+
+    }
+
+    private void displayObservations() {
+        ArrayList<Observation> observations = DatabaseHelper.getObservations(hikeId);
+
+        // Display
+        LinearLayout observationList = findViewById(R.id.observationList);
+        for (Observation observation : observations) {
+            View observationView = getLayoutInflater().inflate(R.layout.observation_item, null);
+            TextView caption = observationView.findViewById(R.id.caption);
+            caption.setText(observation.getCaption());
+            ImageView observationPicture = observationView.findViewById(R.id.observationPicture);
+            if (observation.getImage() != null) {
+                // Change size of the image
+                // from byte[] to Bitmap
+                // This is the image from path
+                // Store the image in the database
+                byte[] imageByte = observation.getImage();
+                // Turn the image into a bitmap
+                Bitmap bitmap = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+                Bitmap rotateImage = rotateImage(bitmap, 90);
+                // Display the image with rotated image
+                observationPicture.setImageBitmap(rotateImage);
+                Log.d("Image", bitmap.toString());
+            } else {
+                observationPicture.setVisibility(View.GONE);
+            }
+            observationView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    Log.d("Delete Observation", String.valueOf(observation.getId()));
+                    Log.d("Delete Observation", String.valueOf(observation.getCaption()));
+
+                    // Display a dialog to confirm
+                    // Delete the observation
+                    AlertDialog.Builder builder = new AlertDialog.Builder(HikeDetailsActivity.this);
+                    builder.setTitle("Edit Observation");
+                    builder.setPositiveButton("Update", (dialog, which) -> {
+                        // Handle the update action here
+                        // Show another dialog or navigate to the update screen
+                    });
+
+                    builder.setNegativeButton("Delete", (dialog, which) -> {
+                        // Handle the delete action here
+                        Observation deletedObservation = DatabaseHelper.deleteObservation(observation.getId());
+                        // Remove the old list and add the new one
+                        observationList.removeAllViews();
+                        displayObservations();
+
+                        Log.d("Deleted Observation Successfully", String.valueOf(deletedObservation.getId()));
+                        // Display a button undo the delete action
+                        ConstraintLayout undoBtn = findViewById(R.id.undoBtn);
+                        undoBtn.setVisibility(View.VISIBLE);
+                        ProgressBar progressBar = findViewById(R.id.progressBar);
+                        AppCompatButton undoButton = findViewById(R.id.undoButton);
+                        progressBar.setVisibility(View.VISIBLE);
+                        progressBar.setMax(3000);
+                        progressBar.setProgress(0);
+                        CountDownTimer countDownTimer = new CountDownTimer(3000, 10) {
+                            @Override
+                            public void onTick(long millisUntilFinished) {
+                                // Update the progress bar with the countdown
+                                // Calculate the remaining time and update the progress bar
+                                int remainingTime = (int) millisUntilFinished;
+                                progressBar.setProgress(remainingTime);
+                            }
+
+                            @Override
+                            public void onFinish() {
+                                // Countdown is complete, show the Undo button
+                                progressBar.setVisibility(View.INVISIBLE);
+                                undoBtn.setVisibility(View.GONE);
+                            }
+                        };
+                        countDownTimer.start();
+
+                        undoButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Log.d("Undo Delete Observation", String.valueOf(deletedObservation.getId()));
+                                // Undo the delete action
+                                try {
+                                    DatabaseHelper.updateObservation(deletedObservation.getId(), deletedObservation.getCaption(), deletedObservation.getDate(), deletedObservation.getImage(), deletedObservation.getLongitude(), deletedObservation.getLatitude(), deletedObservation.getHike().getId(), null);
+                                } catch (ParseException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                // Cancel the countdown
+                                countDownTimer.cancel();
+                                // Hide the undo button
+                                progressBar.setVisibility(View.INVISIBLE);
+                                undoBtn.setVisibility(View.GONE);
+                                // Remove the old list and add the new one
+                                observationList.removeAllViews();
+                                displayObservations();
+                            }
+                        });
+                    });
+
+                    builder.setNeutralButton("Cancel", (dialog, which) -> {
+                        // Handle the cancel action here
+                    });
+                    builder.show();
+
+                    return true;
+                }
+            });
+            observationList.addView(observationView);
+        }
     }
 
     private void updateDescription() {
@@ -317,6 +456,8 @@ public class HikeDetailsActivity extends AppCompatActivity {
             }
         });
 
+        CardView observationPreview = findViewById(R.id.observationPreview);
+
         galleryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -343,6 +484,10 @@ public class HikeDetailsActivity extends AppCompatActivity {
                 if (s.length() == 0) {
                     saveObservationBtn.setVisibility(View.GONE);
                 }
+                if (observationPreview.getVisibility() == View.VISIBLE) {
+                    TextView captionPreview = findViewById(R.id.observationCaptionPreview);
+                    captionPreview.setText(observation.getText().toString());
+                }
             }
 
             @Override
@@ -356,8 +501,8 @@ public class HikeDetailsActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // Save observation
                 observation.clearFocus();
-
-                // TODO: Save to the database
+                observationPreview.removeAllViews();
+                observationPreview.setVisibility(View.GONE);
 
                 Log.d("HikeId", String.valueOf(hikeId));
 
@@ -387,43 +532,125 @@ public class HikeDetailsActivity extends AppCompatActivity {
         Log.d("Caption", caption);
 
         // TODO: Save to the database
-        if (image != null) {
-            Log.d("Image", image.toString());
-        }
+        Date currentDate = new Date();
 
-        // Display the observation
-//        ArrayList<Observation> observationList = null;
-////        TODO: Get observations from the database
         LinearLayout observationList = findViewById(R.id.observationList);
         View observationView = getLayoutInflater().inflate(R.layout.observation_item, null);
         TextView captionTxt = observationView.findViewById(R.id.caption);
         captionTxt.setText(caption);
         ImageView observationPicture = observationView.findViewById(R.id.observationPicture);
+
         if (image != null) {
             // Change size of the image
             // from byte[] to Bitmap
-            Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
-            observationPicture.setImageBitmap(bitmap);
-//            observationPicture.setImageURI(Uri.parse(currentPhotoPath));
+            // This is the image from path
+            // Store the image in the database
+            byte[] imageByte = getBytesFromImagePath(currentPhotoPath);
+            // Turn the image into a bitmap
+            Bitmap bitmap = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+            Bitmap rotateImage = rotateImage(bitmap, 90);
+            // Display the image with rotated image
+            observationPicture.setImageBitmap(rotateImage);
+            Log.d("Image", bitmap.toString());
+            try {
+                DatabaseHelper.insertObservation(caption, currentDate, imageByte, 0, 0, hikeId);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+            deleteImageInMediaStore();
+            currentPhotoPath = null;
+        } else {
+            try {
+                DatabaseHelper.insertObservation(caption, currentDate, null, 0, 0, hikeId);
+                observationPicture.setVisibility(View.GONE);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
-        observationList.addView(observationView);
+        // Remove the old list and add the new one
+        observationList.removeAllViews();
+        displayObservations();
 
-////        try {
-////            observationList = DatabaseHelper.getObservations(hikeId);
-////        } catch (ParseException e) {
-////            throw new RuntimeException(e);
-////        }
-//        Date date = new SimpleDateFormat("yyyy-MM-dd").getCalendar().getTime();
-//        try {
-//            observationList.add(new Observation(1, caption, date.toString(), null, 0, 0, null));
-//        } catch (ParseException e) {
-//            throw new RuntimeException(e);
+        // Clear the text
+        EditText observation = findViewById(R.id.observationEditTxt);
+        observation.setText("");
+    }
+//
+//    //Load a bitmap from a resource with a target size
+//    // This helps to avoid out of memory errors - Reducing the size of the image -> Less laggy scrolling
+//    Bitmap decodeSampledBitmapFromResource(String res) {
+//        // First decode with inJustDecodeBounds=true to check dimensions
+//        final BitmapFactory.Options options = new BitmapFactory.Options();
+//        options.inJustDecodeBounds = true;
+//        BitmapFactory.decodeFile(res, options);
+//
+//        //Calculate display dimention for maximum reqwidth and reqheigth
+//        Display display = getWindowManager().getDefaultDisplay();
+//        Point size = new Point();
+//        display.getSize(size);
+//        int xDim = size.x;
+//        int yDim = size.y;
+//
+//
+//        // Calculate inSampleSize
+//        options.inSampleSize = calculateInSampleSize(options, xDim, yDim);
+//        // Decode bitmap with inSampleSize se5t
+//        options.inJustDecodeBounds = false;
+//        return BitmapFactory.decodeFile(res, options);
+//    }
+//
+//
+//    int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+//        int inSampleSize = 1; //Default subsampling size
+//        // Calculate the largest inSampleSize value
+//        while ((options.outHeight / inSampleSize) > reqHeight
+//                || (options.outWidth / inSampleSize) > reqWidth) {
+//            inSampleSize += 1;
 //        }
+//        return inSampleSize;
+//    }
 
-//        RecyclerView observationRecyclerView = findViewById(R.id.observationRecyclerView);
-//        ObservationListAdapter observationListAdapter = new ObservationListAdapter(this, observationList);
-//        observationRecyclerView.setLayoutManager(new LinearLayoutManager(requiredContext()));
-//        observationRecyclerView.setAdapter(observationListAdapter);
+    public static final byte[] getBytesFromImagePath(String imagePath) {
+        //Only decode image size. Not whole image
+        BitmapFactory.Options option = new BitmapFactory.Options();
+        option.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(imagePath, option);
 
+        // Minimum width and height are > NEW_SIZE (e.g. 380 * 720)
+        final int NEW_SIZE = 480;
+
+        //Now we have image width and height. We should find the correct scale value. (power of 2)
+        int width = option.outWidth;
+        int height = option.outHeight;
+        int scale = 1;
+        while (width / 2 > NEW_SIZE || height / 2 > NEW_SIZE) {
+            width /= 2;//  ww w . j  a  va  2  s.co  m
+            height /= 2;
+            scale++;
+        }
+        //Decode again with inSampleSize
+        option = new BitmapFactory.Options();
+        option.inSampleSize = scale;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(imagePath, option);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+        bitmap.recycle();
+
+        return stream.toByteArray();
+    }
+
+    public static Bitmap rotateImage(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
+                matrix, true);
+    }
+
+    private void deleteImageInMediaStore(){
+        File file = new File(currentPhotoPath);
+        if (file.exists()) {
+            file.delete();
+        }
     }
 }

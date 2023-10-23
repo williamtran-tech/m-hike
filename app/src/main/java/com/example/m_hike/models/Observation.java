@@ -80,9 +80,9 @@ public class Observation {
     private Date deletedAt;
 
 
-    public Observation(Integer id, String name, String date, byte[] image, double longitude, double latitude, Integer hikeId) throws ParseException {
+    public Observation(Integer id, String caption, String date, byte[] image, double longitude, double latitude, Integer hikeId) throws ParseException {
         this.id = id;
-        this.caption = name;
+        this.caption = caption;
         // Use the correct date format
         SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
         this.date = dateFormat.parse(date);
