@@ -11,14 +11,17 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -49,7 +52,9 @@ import com.google.android.material.chip.Chip;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -139,6 +144,28 @@ public class HikeDetailsActivity extends AppCompatActivity {
                 if (data != null) {
                     try {
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+                        File tempFile = createImageFile();
+
+                        FileOutputStream out = new FileOutputStream(tempFile);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out); // You can change the format and quality as needed
+                        out.flush();
+                        out.close();
+
+                        currentPhotoPath = tempFile.getAbsolutePath();
+
+                        ExifInterface exif = new ExifInterface(currentPhotoPath); // Replace imagePath with your image path
+                        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                        Log.d("Orientation", String.valueOf(orientation));
+//                        // Show preview observation
+                        Log.d("Get bitmap from gallery", bitmap.toString());
+                        CardView observationPreview = findViewById(R.id.observationPreview);
+                        ImageView observationPicturePreview = findViewById(R.id.observationPicPreview);
+                        observationPicturePreview.setImageBitmap(bitmap);
+                        observationPreview.setVisibility(View.VISIBLE);
+                        TextView caption = findViewById(R.id.observationCaptionPreview);
+                        EditText captionEdit = findViewById(R.id.observationEditTxt);
+                        caption.setText(captionEdit.getText().toString());
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -264,6 +291,10 @@ public class HikeDetailsActivity extends AppCompatActivity {
             TextView caption = observationView.findViewById(R.id.caption);
             caption.setText(observation.getCaption());
             ImageView observationPicture = observationView.findViewById(R.id.observationPicture);
+            TextView date = observationView.findViewById(R.id.date);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm");
+            String outputDate = dateFormat.format(observation.getDate());
+            date.setText(outputDate);
             if (observation.getImage() != null) {
                 // Change size of the image
                 // from byte[] to Bitmap
@@ -282,8 +313,6 @@ public class HikeDetailsActivity extends AppCompatActivity {
             observationView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
-                    Log.d("Delete Observation", String.valueOf(observation.getId()));
-                    Log.d("Delete Observation", String.valueOf(observation.getCaption()));
 
                     // Display a dialog to confirm
                     // Delete the observation
@@ -291,7 +320,32 @@ public class HikeDetailsActivity extends AppCompatActivity {
                     builder.setTitle("Edit Observation");
                     builder.setPositiveButton("Update", (dialog, which) -> {
                         // Handle the update action here
-                        // Show another dialog or navigate to the update screen
+                        // Show another dialog to update caption
+                        AlertDialog.Builder updateCaptionBuilder = new AlertDialog.Builder(HikeDetailsActivity.this);
+                        updateCaptionBuilder.setTitle("Update Caption");
+                        EditText captionEdit = new EditText(HikeDetailsActivity.this);
+                        captionEdit.setText(observation.getCaption());
+                        updateCaptionBuilder.setView(captionEdit);
+
+                        updateCaptionBuilder.setPositiveButton("Update", (dialog1, which1) -> {
+                            // Update the caption
+                            Observation updatedObservation = null;
+                            try {
+                                updatedObservation = DatabaseHelper.updateObservation(observation.getId(), captionEdit.getText().toString(), observation.getDate(), observation.getImage(), observation.getLongitude(), observation.getLatitude(), observation.getHike().getId(), null);
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
+                            }
+                            // Remove the old list and add the new one
+                            observationList.removeAllViews();
+                            displayObservations();
+                            Log.d("Update caption Successfully", String.valueOf(updatedObservation.getId()));
+                        });
+                        updateCaptionBuilder.setNegativeButton("Cancel", (dialog1, which1) -> {
+                            // Handle nothing
+                        });
+
+
+                        updateCaptionBuilder.show();
                     });
 
                     builder.setNegativeButton("Delete", (dialog, which) -> {
@@ -324,6 +378,7 @@ public class HikeDetailsActivity extends AppCompatActivity {
                                 // Countdown is complete, show the Undo button
                                 progressBar.setVisibility(View.INVISIBLE);
                                 undoBtn.setVisibility(View.GONE);
+                                DatabaseHelper.forceDeleteObservation(deletedObservation.getId());
                             }
                         };
                         countDownTimer.start();
@@ -351,7 +406,7 @@ public class HikeDetailsActivity extends AppCompatActivity {
                     });
 
                     builder.setNeutralButton("Cancel", (dialog, which) -> {
-                        // Handle the cancel action here
+                        // Handle nothing
                     });
                     builder.show();
 
@@ -422,8 +477,8 @@ public class HikeDetailsActivity extends AppCompatActivity {
                             getIntent().getBooleanExtra("availableParking", false),
                             getIntent().getFloatExtra("duration", 0),
                             getIntent().getFloatExtra("distance", 0),
-                            new Difficulty(getIntent().getIntExtra("diffId", 0), getIntent().getStringExtra("diffName")),
-                            description.getText().toString());
+                            getIntent().getIntExtra("diffId", 0),
+                            description.getText().toString(), null);
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
@@ -465,6 +520,8 @@ public class HikeDetailsActivity extends AppCompatActivity {
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_IMAGE);
+
+
             }
         });
 
@@ -521,7 +578,7 @@ public class HikeDetailsActivity extends AppCompatActivity {
                 galleryBtn.setVisibility(View.GONE);
                 saveObservationBtn.setVisibility(View.GONE);
                 imm.hideSoftInputFromWindow(observation.getWindowToken(), 0);
-                Toast.makeText(HikeDetailsActivity.this, "Description saved", Toast.LENGTH_SHORT - 500).show();
+                Toast.makeText(HikeDetailsActivity.this, "Observation saved", Toast.LENGTH_SHORT - 500).show();
             }
         });
     }
@@ -540,18 +597,16 @@ public class HikeDetailsActivity extends AppCompatActivity {
         captionTxt.setText(caption);
         ImageView observationPicture = observationView.findViewById(R.id.observationPicture);
 
+        // Store the Captured image
         if (image != null) {
-            // Change size of the image
             // from byte[] to Bitmap
-            // This is the image from path
-            // Store the image in the database
             byte[] imageByte = getBytesFromImagePath(currentPhotoPath);
             // Turn the image into a bitmap
+            // Change size of the image
             Bitmap bitmap = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
             Bitmap rotateImage = rotateImage(bitmap, 90);
             // Display the image with rotated image
             observationPicture.setImageBitmap(rotateImage);
-            Log.d("Image", bitmap.toString());
             try {
                 DatabaseHelper.insertObservation(caption, currentDate, imageByte, 0, 0, hikeId);
             } catch (ParseException e) {
@@ -575,40 +630,6 @@ public class HikeDetailsActivity extends AppCompatActivity {
         EditText observation = findViewById(R.id.observationEditTxt);
         observation.setText("");
     }
-//
-//    //Load a bitmap from a resource with a target size
-//    // This helps to avoid out of memory errors - Reducing the size of the image -> Less laggy scrolling
-//    Bitmap decodeSampledBitmapFromResource(String res) {
-//        // First decode with inJustDecodeBounds=true to check dimensions
-//        final BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inJustDecodeBounds = true;
-//        BitmapFactory.decodeFile(res, options);
-//
-//        //Calculate display dimention for maximum reqwidth and reqheigth
-//        Display display = getWindowManager().getDefaultDisplay();
-//        Point size = new Point();
-//        display.getSize(size);
-//        int xDim = size.x;
-//        int yDim = size.y;
-//
-//
-//        // Calculate inSampleSize
-//        options.inSampleSize = calculateInSampleSize(options, xDim, yDim);
-//        // Decode bitmap with inSampleSize se5t
-//        options.inJustDecodeBounds = false;
-//        return BitmapFactory.decodeFile(res, options);
-//    }
-//
-//
-//    int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-//        int inSampleSize = 1; //Default subsampling size
-//        // Calculate the largest inSampleSize value
-//        while ((options.outHeight / inSampleSize) > reqHeight
-//                || (options.outWidth / inSampleSize) > reqWidth) {
-//            inSampleSize += 1;
-//        }
-//        return inSampleSize;
-//    }
 
     public static final byte[] getBytesFromImagePath(String imagePath) {
         //Only decode image size. Not whole image
@@ -624,7 +645,7 @@ public class HikeDetailsActivity extends AppCompatActivity {
         int height = option.outHeight;
         int scale = 1;
         while (width / 2 > NEW_SIZE || height / 2 > NEW_SIZE) {
-            width /= 2;//  ww w . j  a  va  2  s.co  m
+            width /= 2;
             height /= 2;
             scale++;
         }

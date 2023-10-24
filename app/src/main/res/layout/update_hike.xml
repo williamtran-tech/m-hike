@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:cardCornerRadius="30dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/nameEditTxt"
+                android:layout_width="240dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/edit_txt"
+                android:ems="10"
+                android:hint="Hike name"
+                android:inputType="text"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:textSize="14sp"
+                android:layout_marginEnd="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.508"
+                app:layout_constraintStart_toEndOf="@+id/nameTxt"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="MissingConstraints" />
+
+            <TextView
+                android:id="@+id/nameTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="36dp"
+                android:text="Hike"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="MissingConstraints" />
+
+            <TextView
+                android:id="@+id/editTextDate"
+                android:layout_width="240dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/edit_txt"
+                android:drawableEnd="@drawable/baseline_date_range_24"
+                android:gravity="center_vertical"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="@+id/nameEditTxt"
+                app:layout_constraintTop_toBottomOf="@+id/nameEditTxt"
+                tools:ignore="MissingConstraints" />
+
+            <TextView
+                android:id="@+id/dateTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="44dp"
+                android:text="Date"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="@+id/nameTxt"
+                app:layout_constraintTop_toBottomOf="@+id/nameTxt"
+                tools:ignore="MissingConstraints" />
+
+            <TextView
+                android:id="@+id/locationTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="44dp"
+                android:text="Location"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="@+id/dateTxt"
+                app:layout_constraintTop_toBottomOf="@+id/dateTxt"
+                tools:ignore="MissingConstraints" />
+
+            <EditText
+                android:id="@+id/locationEditTxt"
+                android:layout_width="240dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/edit_txt"
+                android:ems="10"
+                android:hint="Hike location"
+                android:inputType="text"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="@+id/editTextDate"
+                app:layout_constraintTop_toBottomOf="@+id/editTextDate"
+                tools:ignore="MissingConstraints" />
+
+            <TextView
+                android:id="@+id/parkingAvailableTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:text="Parking Available"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="@+id/locationTxt"
+                app:layout_constraintTop_toBottomOf="@+id/locationTxt"
+                tools:ignore="MissingConstraints" />
+
+            <RadioGroup
+                android:id="@+id/parkingRadioGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toEndOf="@+id/parkingAvailableTxt"
+                app:layout_constraintTop_toBottomOf="@+id/locationEditTxt">
+
+                <RadioButton
+                    android:id="@+id/yesRadioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:text="Yes" />
+
+                <RadioButton
+                    android:id="@+id/noRadioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="No" />
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/difficultyTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="52dp"
+                android:text="Difficulty"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="@+id/parkingAvailableTxt"
+                app:layout_constraintTop_toBottomOf="@+id/parkingAvailableTxt"
+                tools:ignore="MissingConstraints" />
+
+            <RatingBar
+                android:id="@+id/ratingBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:progressTint="@color/golden"
+                android:stepSize="1"
+                app:layout_constraintStart_toStartOf="@+id/locationEditTxt"
+                app:layout_constraintTop_toBottomOf="@+id/parkingRadioGroup"
+                tools:ignore="MissingConstraints" />
+
+            <TextView
+                android:id="@+id/durationTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="56dp"
+                android:text="Duration"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="@+id/difficultyTxt"
+                app:layout_constraintTop_toBottomOf="@+id/difficultyTxt"
+                tools:ignore="MissingConstraints" />
+
+            <EditText
+                android:id="@+id/durationEditTxt"
+                android:layout_width="240dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/edit_txt"
+                android:ems="10"
+                android:hint="Duration (hours)"
+                android:inputType="number|numberDecimal"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="@+id/ratingBar"
+                app:layout_constraintTop_toBottomOf="@+id/ratingBar"
+                tools:ignore="MissingConstraints" />
+
+            <TextView
+                android:id="@+id/distanceTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="44dp"
+                android:text="Distance"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="@+id/durationTxt"
+                app:layout_constraintTop_toBottomOf="@+id/durationTxt"
+                tools:ignore="MissingConstraints" />
+
+            <EditText
+                android:id="@+id/distanceEditTxt"
+                android:layout_width="240dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="15dp"
+                android:background="@drawable/edit_txt"
+                android:ems="10"
+                android:hint="Distance (km)"
+                android:inputType="number|numberDecimal"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/durationEditTxt"
+                app:layout_constraintTop_toBottomOf="@+id/durationEditTxt"
+                tools:ignore="MissingConstraints" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

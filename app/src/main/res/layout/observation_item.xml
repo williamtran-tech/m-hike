@@ -18,15 +18,37 @@
             android:layout_height="wrap_content">
 
         <TextView
+            android:id="@+id/captionTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="5dp"
+            android:text="Observation"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mon Oct 23 22:34:56"
+            android:textSize="12sp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginTop="5dp"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <TextView
             android:id="@+id/caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Caption of the picture"
             android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
             android:textColor="@color/black"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/captionTxt" />
 
         <ImageView
             android:id="@+id/observationPicture"

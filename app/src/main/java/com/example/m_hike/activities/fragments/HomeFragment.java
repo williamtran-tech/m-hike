@@ -1,10 +1,12 @@
 package com.example.m_hike.activities.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,6 +27,7 @@ import com.example.m_hike.adapters.HikeListAdapter;
 import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.models.Difficulty;
 import com.example.m_hike.models.Hike;
+import com.example.m_hike.modules.CompassHandler;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -34,6 +37,7 @@ import java.util.ArrayList;
 public class HomeFragment extends Fragment {
     private DatabaseHelper dbHelper;
     private HikeListAdapter hikeListAdapter; // Declare the ListView
+    private CompassHandler compassHandler; // Decorator
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -65,6 +69,11 @@ public class HomeFragment extends Fragment {
         ImageView homeBackground = homeFragmentView.findViewById(R.id.homeBackground);
         AppCompatButton addHikeButton = homeFragmentView.findViewById(R.id.addHikeBtn);
         TextView searchHike = homeFragmentView.findViewById(R.id.searchView);
+
+        // Display decorator compass
+        ImageView compassImg = homeFragmentView.findViewById(R.id.compassImg);
+        compassHandler = new CompassHandler(getContext(), compassImg);
+
         try {
             if (!dbHelper.getHikes().isEmpty()) {
                 ArrayList<Hike> hikeList;
@@ -102,5 +111,20 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         return homeFragmentView;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        compassHandler.start();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        compassHandler.stop();
+    }
+
 
 }

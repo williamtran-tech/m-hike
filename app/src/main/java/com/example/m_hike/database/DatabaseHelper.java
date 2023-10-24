@@ -50,6 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    // HIKE CRUD
     public Hike insertHike(String name, Date date, String location, boolean availableParking, Integer difficulty, Float duration, Float distance) throws ParseException {
         ContentValues rowValues = new ContentValues(); // new row object
         rowValues.put(HIKE.HikeEntry.NAME_COLUMN_NAME, name);
@@ -65,7 +66,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, new Difficulty(difficulty, null), null);
     }
     public static ArrayList<Hike> getHikes() throws ParseException {
-        String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, difficulties.id, difficulties.name FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE deletedAt IS NULL ORDER BY hikes.date DESC";
+        String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, difficulties.id, difficulties.name, hikes.description FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE deletedAt IS NULL ORDER BY hikes.date DESC";
         Cursor res = database.rawQuery(query , null);
         ArrayList<Hike> hikesList = new ArrayList<Hike>();
 
@@ -81,28 +82,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int difficultyId = res.getInt(7);
                 String difficultyName = res.getString(8);
                 Difficulty difficulty = new Difficulty(difficultyId, difficultyName);
+                String description = res.getString(9);
 //          Integer id, String name, String location, String date, boolean availableParking, Float duration, Float distance, Difficulty difficulty
-                Hike hike = new Hike(id, name, location, date, parkingAvailable, duration, distance, difficulty, null);
+                Hike hike = new Hike(id, name, location, date, parkingAvailable, duration, distance, difficulty, description);
                 hikesList.add(hike);
             } while (res.moveToNext());
         }
         res.close();
         return hikesList;
     }
-    public static Hike updateHike(Integer id, String name, Date date, String location, boolean availableParking, Float duration, Float distance, Difficulty difficulty, String description) throws ParseException {
+    public static Hike updateHike(Integer id, String name, Date date, String location, boolean availableParking, Float duration, Float distance, Integer difficultyId, String description,Date deletedAt) throws ParseException {
         ContentValues rowValues = new ContentValues(); // new row object
         rowValues.put(HIKE.HikeEntry.NAME_COLUMN_NAME, name);
         rowValues.put(HIKE.HikeEntry.DATE_COLUMN_NAME, date.toString());
         rowValues.put(HIKE.HikeEntry.LOCATION_COLUMN_NAME, location);
         rowValues.put(HIKE.HikeEntry.AVAILABLE_PARKING_COLUMN_NAME, availableParking);
-        rowValues.put(HIKE.HikeEntry.DIFFICULTY_COLUMN_NAME, difficulty.getId());
+        rowValues.put(HIKE.HikeEntry.DIFFICULTY_COLUMN_NAME, difficultyId);
         rowValues.put(HIKE.HikeEntry.DURATION_COLUMN_NAME, duration);
         rowValues.put(HIKE.HikeEntry.DISTANCE_COLUMN_NAME, distance);
         rowValues.put(HIKE.HikeEntry.DESCRIPTION_COLUMN_NAME, description);
-
+        if (deletedAt != null) {
+            Log.d("DeletedAt", deletedAt.toString());
+            rowValues.put(HIKE.HikeEntry.DELETEDAT_COLUMN_NAME, deletedAt.toString());
+        } else {
+            rowValues.putNull(HIKE.HikeEntry.DELETEDAT_COLUMN_NAME);
+        }
         long res = database.update(HIKE.HikeEntry.TABLE_NAME, rowValues, "id = " + id, null);
+        Log.d("Database - Update: ", name + id);
 
-        return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, difficulty, description);
+        return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, new Difficulty(difficultyId, null), description);
     }
     public static Hike getHike(Integer id) throws ParseException {
         String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, hikes.difficultyId, difficulties.name, hikes.description  FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE hikes.id = " + id;
@@ -125,11 +133,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String description = res.getString(9);
 
                 hike = new Hike(hikeId, name, location, date, parkingAvailable, duration, distance, difficulty, description);
+                Log.d("Database - Get Hike: ", id + " " + hike.getName());
             }
             cursor.close(); // Don't forget to close the cursor when you're done with it
         }
         return hike;
     }
+    public static Hike deleteHike(Integer id) throws ParseException {
+        ContentValues rowValues = new ContentValues(); // new row object
+        rowValues.put(HIKE.HikeEntry.DELETEDAT_COLUMN_NAME, new Date().toString());
+
+        long res = database.update(HIKE.HikeEntry.TABLE_NAME, rowValues, "id = " + id, null);
+
+        return getHike(id);
+    }
+    public static boolean forceDeleteHike(Integer id) {
+        long hike = database.delete(HIKE.HikeEntry.TABLE_NAME, "id = " + id, null);
+        // Delete observations associated with hike
+        long obs = database.delete(OBSERVATION.ObservationEntry.TABLE_NAME, "hike_id = " + id, null);
+        return (hike > 0 && obs > 0);
+    }
+
+    // DIFFICULTY INITIALIZATION
     private void seedDifficulties(SQLiteDatabase db) {
         String[] inserts = DIFFICULTY.DifficultyEntry.Seed();
         Log.d("DifInserts", inserts.toString());
@@ -156,6 +181,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return difficultiesList;
     }
+
+    // OBSERVATION CRUD
     public static Observation insertObservation(String caption, Date date, byte[] image, double longitude, double latitude, Integer hikeId) throws ParseException {
         ContentValues rowValues = new ContentValues(); // new row object
         rowValues.put(OBSERVATION.ObservationEntry.CAPTION_COLUMN_NAME, caption);
@@ -232,6 +259,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return getObservation(id);
     }
 
+    public static boolean forceDeleteObservation(Integer id) {
+        long res = database.delete(OBSERVATION.ObservationEntry.TABLE_NAME, "id = " + id, null);
+        return res > 0;
+    }
+
     public static Observation updateObservation(Integer id, String caption, Date date, byte[] image, double longitude, double latitude, Integer hikeId, Date deletedAt ) throws ParseException {
         ContentValues rowValues = new ContentValues(); // new row object
         Log.d("Date", date.toString());
@@ -239,7 +271,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.d("WTA", "ASd");
             rowValues.put(OBSERVATION.ObservationEntry.DELETEDAT_COLUMN_NAME, deletedAt.toString());
         } else {
-            rowValues.put(OBSERVATION.ObservationEntry.DELETEDAT_COLUMN_NAME, (String) null);
+            rowValues.putNull(OBSERVATION.ObservationEntry.DELETEDAT_COLUMN_NAME);
         }
         rowValues.put(OBSERVATION.ObservationEntry.CAPTION_COLUMN_NAME, caption);
         rowValues.put(OBSERVATION.ObservationEntry.OBSERVATION_COLUMN_NAME, image);

@@ -7,12 +7,12 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/undoButton"
-        android:background="@drawable/undo_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="117dp"
+        android:layout_height="39dp"
         android:layout_centerInParent="true"
-        android:textColor="@color/white"
+        android:background="@drawable/undo_button"
         android:text="Undo"
+        android:textColor="@color/white"
         android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
         tools:ignore="MissingConstraints"
@@ -21,8 +21,8 @@
     <ProgressBar
         android:id="@+id/progressBar"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:layout_width="88dp"
-        android:layout_height="14dp"
+        android:layout_width="113dp"
+        android:layout_height="15dp"
         android:layout_centerInParent="true"
         android:progressTint="#AD0202"
         app:layout_constraintStart_toStartOf="parent"

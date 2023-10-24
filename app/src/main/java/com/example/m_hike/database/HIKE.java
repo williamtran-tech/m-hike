@@ -27,8 +27,7 @@ public final class HIKE implements BaseColumns {
         public static final String DISTANCE_COLUMN_NAME = "distance";
         public static final String DESCRIPTION_COLUMN_NAME = "description";
         public static final String DIFFICULTY_COLUMN_NAME = "difficultyId";
-
-        private static final String DELETEDAT_COLUMN_NAME = "deletedAt"; ;
+        public static final String DELETEDAT_COLUMN_NAME = "deletedAt"; ;
         public static final String CREATE_QUERY = String.format(
                 "CREATE TABLE IF NOT EXISTS %s (" +
                         "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +

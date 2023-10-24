@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -61,10 +62,6 @@ public class AddFragment extends Fragment {
     private DatabaseHelper dbHelper;
     private TextView date;
 
-    //    LOCATION
-    // initializing
-    // FusedLocationProviderClient
-    // object
     FusedLocationProviderClient mFusedLocationClient;
     int PERMISSION_ID = 44;
     public AddFragment() {
@@ -99,7 +96,6 @@ public class AddFragment extends Fragment {
         );
         ImageView locationBtn = (ImageView) addFragmentView.findViewById(R.id.locationImg);
         locationBtn.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
                 try {
@@ -156,7 +152,6 @@ public class AddFragment extends Fragment {
         EditText distance = getActivity().findViewById(R.id.distanceEditTxt);
         RadioGroup radioGroup = getActivity().findViewById(R.id.parkingRadioGroup);
 
-
         String name = nameTxt.getText().toString();
         // extract the date from the text view
         String dateStr = date.getText().toString();
@@ -195,6 +190,15 @@ public class AddFragment extends Fragment {
         distance.setText("");
 
         Log.d("Get Hikes:", dbHelper.getHikes().toString());
+
+        // Hide keyboard
+        InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+
+        // Go to home fragment
+        Fragment homeFragment = new HomeFragment();
+        // add transition
+        getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right).replace(R.id.fragment_container, homeFragment).commit();
     }
 
     public static class DatePickerDialogTheme extends DialogFragment implements DatePickerDialog.OnDateSetListener {
@@ -226,7 +230,7 @@ public class AddFragment extends Fragment {
 
 //    LOCATION
     @SuppressLint("MissingPermission")
-    private void getLastLocation() {
+    public void getLastLocation() {
 
         // check if permissions are given
         if (checkPermissions()) {
@@ -271,7 +275,7 @@ public class AddFragment extends Fragment {
     }
 
     @SuppressLint("MissingPermission")
-    private void requestNewLocationData() {
+    public void requestNewLocationData() {
 
         // Initializing LocationRequest
         // object with appropriate methods
@@ -287,7 +291,7 @@ public class AddFragment extends Fragment {
         mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
     }
 
-    private LocationCallback mLocationCallback = new LocationCallback() {
+    public LocationCallback mLocationCallback = new LocationCallback() {
 
         @Override
         public void onLocationResult(LocationResult locationResult) {
@@ -299,12 +303,12 @@ public class AddFragment extends Fragment {
     };
 
     // method to check for permissions
-    private boolean checkPermissions() {
+    public boolean checkPermissions() {
         return ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     // method to request for permissions
-    private void requestPermissions() {
+    public void requestPermissions() {
         ActivityCompat.requestPermissions(getActivity(), new String[]{
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_ID);
@@ -312,7 +316,7 @@ public class AddFragment extends Fragment {
 
     // method to check
     // if location is enabled
-    private boolean isLocationEnabled() {
+    public boolean isLocationEnabled() {
         LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
