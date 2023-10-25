@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-<!--        User Preferences -->
+        <!--        User Preferences -->
         <androidx.cardview.widget.CardView
             android:id="@+id/avatarCardView"
             android:layout_width="80dp"
@@ -39,8 +39,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:scaleType="centerCrop"
-                android:src="@drawable/intro_background">
-            </ImageView>
+                android:src="@drawable/intro_background"></ImageView>
         </androidx.cardview.widget.CardView>
 
         <TextView
@@ -56,6 +55,7 @@
             app:layout_constraintTop_toTopOf="@+id/avatarCardView" />
 
         <TextView
+            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -77,10 +77,10 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-<!--        The Rest Importance -->
+        <!--        The Rest Importance -->
         <EditText
             android:id="@+id/searchView"
-            android:layout_width="match_parent"
+            android:layout_width="250dp"
             android:layout_height="50dp"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
@@ -91,31 +91,45 @@
             android:inputType="text"
             android:paddingStart="10dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/avatarCardView" />
+
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/spinner"
+            android:spinnerMode="dropdown"
+            app:layout_constraintBottom_toBottomOf="@+id/searchView"
+            app:layout_constraintStart_toEndOf="@+id/searchView"
+            tools:ignore="MissingConstraints" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/hikeRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/searchView"
             android:paddingBottom="155dp"
+            app:layout_constraintTop_toBottomOf="@+id/searchView"
             tools:listitem="@layout/hike_item">
 
         </androidx.recyclerview.widget.RecyclerView>
 
         <include
-            layout="@layout/no_hike_layout"
             android:id="@+id/emptyView"
+            layout="@layout/no_hike_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
-            app:layout_constraintTop_toBottomOf="@+id/searchView"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:visibility="gone" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/searchView" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/addHikeBtn"
@@ -124,9 +138,10 @@
             android:layout_marginTop="30dp"
             android:layout_marginBottom="10dp"
             android:background="@drawable/background_btn"
+            android:clickable="false"
+            android:drawableBottom="@drawable/baseline_arrow_downward_24"
             android:text="Add Hike Here"
             android:textColor="@color/white"
-            android:clickable="false"
             android:textStyle="bold"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -134,8 +149,7 @@
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/emptyView"
-            app:layout_constraintVertical_bias="0.981"
-            android:drawableBottom="@drawable/baseline_arrow_downward_24"/>
+            app:layout_constraintVertical_bias="0.981" />
 
         <include
             android:id="@+id/undoHikeBtn"

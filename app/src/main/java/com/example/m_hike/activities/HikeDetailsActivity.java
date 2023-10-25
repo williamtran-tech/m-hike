@@ -35,6 +35,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -52,6 +53,7 @@ import com.google.android.material.chip.Chip;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,6 +61,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Vector;
 
 public class HikeDetailsActivity extends AppCompatActivity {
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 2;
@@ -128,6 +131,7 @@ public class HikeDetailsActivity extends AppCompatActivity {
                     ImageView observationPicturePreview = findViewById(R.id.observationPicPreview);
                     Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
                     Bitmap rotateImage = rotateImage(bitmap, 90);
+
                     observationPicturePreview.setImageBitmap(rotateImage);
                     observationPreview.setVisibility(View.VISIBLE);
                     TextView caption = findViewById(R.id.observationCaptionPreview);
@@ -143,21 +147,21 @@ public class HikeDetailsActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 if (data != null) {
                     try {
-                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+                        Uri imageUri = data.getData();
+                        Bitmap bitmap = getThumbnail(imageUri);
+//                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
                         File tempFile = createImageFile();
-
+//
                         FileOutputStream out = new FileOutputStream(tempFile);
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out); // You can change the format and quality as needed
                         out.flush();
                         out.close();
-
+//
                         currentPhotoPath = tempFile.getAbsolutePath();
-
+//
                         ExifInterface exif = new ExifInterface(currentPhotoPath); // Replace imagePath with your image path
                         int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-                        Log.d("Orientation", String.valueOf(orientation));
-//                        // Show preview observation
-                        Log.d("Get bitmap from gallery", bitmap.toString());
+
                         CardView observationPreview = findViewById(R.id.observationPreview);
                         ImageView observationPicturePreview = findViewById(R.id.observationPicPreview);
                         observationPicturePreview.setImageBitmap(bitmap);
@@ -520,8 +524,6 @@ public class HikeDetailsActivity extends AppCompatActivity {
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_IMAGE);
-
-
             }
         });
 
@@ -673,5 +675,39 @@ public class HikeDetailsActivity extends AppCompatActivity {
         if (file.exists()) {
             file.delete();
         }
+    }
+
+    public Bitmap getThumbnail(Uri uri) throws FileNotFoundException, IOException{
+        InputStream input = this.getContentResolver().openInputStream(uri);
+
+        BitmapFactory.Options onlyBoundsOptions = new BitmapFactory.Options();
+        onlyBoundsOptions.inJustDecodeBounds = true;
+        onlyBoundsOptions.inDither=true;//optional
+        onlyBoundsOptions.inPreferredConfig=Bitmap.Config.ARGB_8888;//optional
+        BitmapFactory.decodeStream(input, null, onlyBoundsOptions);
+        input.close();
+
+        if ((onlyBoundsOptions.outWidth == -1) || (onlyBoundsOptions.outHeight == -1)) {
+            return null;
+        }
+
+        int originalSize = (onlyBoundsOptions.outHeight > onlyBoundsOptions.outWidth) ? onlyBoundsOptions.outHeight : onlyBoundsOptions.outWidth;
+
+        double ratio = (originalSize > 480) ? (originalSize / 480) : 1.0;
+
+        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+        bitmapOptions.inSampleSize = getPowerOfTwoForSampleRatio(ratio);
+        bitmapOptions.inDither = true; //optional
+        bitmapOptions.inPreferredConfig=Bitmap.Config.ARGB_8888;//
+        input = this.getContentResolver().openInputStream(uri);
+        Bitmap bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions);
+        input.close();
+        return bitmap;
+    }
+
+    private static int getPowerOfTwoForSampleRatio(double ratio){
+        int k = Integer.highestOneBit((int)Math.floor(ratio));
+        if(k==0) return 1;
+        else return k;
     }
 }

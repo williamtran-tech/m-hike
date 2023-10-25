@@ -12,14 +12,20 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.m_hike.R;
@@ -31,12 +37,13 @@ import com.example.m_hike.modules.CompassHandler;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
     private DatabaseHelper dbHelper;
-    private HikeListAdapter hikeListAdapter; // Declare the ListView
+    public static Difficulty filter;
     private CompassHandler compassHandler; // Decorator
     public HomeFragment() {
         // Required empty public constructor
@@ -68,7 +75,60 @@ public class HomeFragment extends Fragment {
         View homeFragmentView = inflater.inflate(R.layout.fragment_home, container, false);
         ImageView homeBackground = homeFragmentView.findViewById(R.id.homeBackground);
         AppCompatButton addHikeButton = homeFragmentView.findViewById(R.id.addHikeBtn);
-        TextView searchHike = homeFragmentView.findViewById(R.id.searchView);
+        EditText searchHike = homeFragmentView.findViewById(R.id.searchView);
+        Spinner spinner = homeFragmentView.findViewById(R.id.spinner);
+
+        // Set spinner
+        // Turn database difficulties into array
+        ArrayList<String> difficulties = new ArrayList<>();
+        for (Difficulty difficulty : dbHelper.getDifficulties()) {
+            difficulties.add(difficulty.getName());
+        }
+        difficulties.add(0, "All");
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, difficulties);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        final HikeListAdapter[] hikeAdapter = new HikeListAdapter[1];
+        // Handle spinner selection
+        spinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                ArrayList<Hike> hikeList = new ArrayList<>();
+                searchHike.setText("");
+                String difficulty = adapterView.getItemAtPosition(i).toString();
+                if (!difficulty.equals("All")) {
+                    Difficulty difficultyObj = dbHelper.getDifficulties().get(i - 1);
+                    filter = difficultyObj;
+                    try {
+                        hikeList = dbHelper.getHikesByDifficulty(difficultyObj);
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    try {
+                        hikeList = dbHelper.getHikes();
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                    filter = null;
+                }
+                // Sort hikes by date
+                hikeList.sort((hike1, hike2) -> hike2.getDate().compareTo(hike1.getDate()));
+                hikeAdapter[0] = new HikeListAdapter(getContext(), hikeList);
+
+                // Set layout manager this RecyclerView will use
+                RecyclerView recyclerView = homeFragmentView.findViewById(R.id.hikeRecyclerView);
+
+                recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+                recyclerView.setAdapter(hikeAdapter[0]);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         // Display decorator compass
         ImageView compassImg = homeFragmentView.findViewById(R.id.compassImg);
@@ -76,28 +136,27 @@ public class HomeFragment extends Fragment {
 
         try {
             if (!dbHelper.getHikes().isEmpty()) {
-                ArrayList<Hike> hikeList;
-                try {
-                    hikeList = dbHelper.getHikes();
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-                HikeListAdapter hikeAdapter = new HikeListAdapter(getContext(), hikeList);
+                // Search for hikes
+                searchHike.addTextChangedListener(new TextWatcher() {
+                      @Override
+                      public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                      }
 
-                homeBackground.setVisibility(View.VISIBLE);
-                addHikeButton.setVisibility(View.GONE);
-                searchHike.setVisibility(View.VISIBLE);
-                // Set layout manager this RecyclerView will use
-                RecyclerView recyclerView = homeFragmentView.findViewById(R.id.hikeRecyclerView);
+                      @Override
+                      public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                          if (hikeAdapter[0] != null) {
+                              if (charSequence != null) {
+                                  hikeAdapter[0].getFilter().filter(charSequence);
+                              }
+                          }
+                      }
 
-//                recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
-//                recyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-                recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-                recyclerView.setAdapter(hikeAdapter);
+                      @Override
+                      public void afterTextChanged(Editable editable) {
 
-//                // Set the list of contacts to the ListView
-//                ListView hikeRecycleView = homeFragmentView.findViewById(R.id.hikeRecyclerView);
-//                hikeRecycleView.setAdapter((hikeListAdapter));
+                      }
+                  }
+                );
             } else {
                 searchHike.setVisibility(View.GONE);
                 homeBackground.setVisibility(View.GONE);

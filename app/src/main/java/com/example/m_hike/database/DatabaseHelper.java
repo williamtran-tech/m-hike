@@ -66,7 +66,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, new Difficulty(difficulty, null), null);
     }
     public static ArrayList<Hike> getHikes() throws ParseException {
-        String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, difficulties.id, difficulties.name, hikes.description FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE deletedAt IS NULL ORDER BY hikes.date DESC";
+        String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, difficulties.id, difficulties.name, hikes.description FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE deletedAt IS NULL ORDER BY hikes.date ASC";
+        Cursor res = database.rawQuery(query , null);
+        ArrayList<Hike> hikesList = new ArrayList<Hike>();
+
+        if (res.moveToFirst()) {
+            do {
+                int id = res.getInt(0);
+                String name = res.getString(1);
+                String location = res.getString(2);
+                String date = res.getString(3);
+                boolean parkingAvailable = res.getInt(4) == 1;
+                Float duration = res.getFloat(5);
+                Float distance = res.getFloat(6);
+                int difficultyId = res.getInt(7);
+                String difficultyName = res.getString(8);
+                Difficulty difficulty = new Difficulty(difficultyId, difficultyName);
+                String description = res.getString(9);
+//          Integer id, String name, String location, String date, boolean availableParking, Float duration, Float distance, Difficulty difficulty
+                Hike hike = new Hike(id, name, location, date, parkingAvailable, duration, distance, difficulty, description);
+                hikesList.add(hike);
+            } while (res.moveToNext());
+        }
+        res.close();
+        return hikesList;
+    }
+    public static ArrayList<Hike> getHikesByDifficulty(Difficulty difficultyObj) throws ParseException {
+        String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, difficulties.id, difficulties.name, hikes.description FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE deletedAt IS NULL AND difficulties.id = " + difficultyObj.getId() +" ORDER BY hikes.date ASC";
         Cursor res = database.rawQuery(query , null);
         ArrayList<Hike> hikesList = new ArrayList<Hike>();
 
@@ -110,7 +136,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         long res = database.update(HIKE.HikeEntry.TABLE_NAME, rowValues, "id = " + id, null);
         Log.d("Database - Update: ", name + id);
 
-        return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, new Difficulty(difficultyId, null), description);
+        Difficulty diff = DatabaseHelper.getDifficulty(difficultyId);
+        return new Hike((int) res, name, location, date.toString(), availableParking, duration, distance, diff, description);
     }
     public static Hike getHike(Integer id) throws ParseException {
         String query = "SELECT hikes.id, hikes.name, hikes.location, hikes.date, hikes.availableParking, hikes.duration, hikes.distance, hikes.difficultyId, difficulties.name, hikes.description  FROM hikes INNER JOIN difficulties ON hikes.difficultyId = difficulties.id WHERE hikes.id = " + id;
@@ -180,6 +207,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         res.close();
 
         return difficultiesList;
+    }
+
+    public static Difficulty getDifficulty(Integer id) {
+        ContentValues rowValues = new ContentValues(); // new row object
+        String query = "SELECT id, name from difficulties where id = " + id;
+        Cursor cursor = database.rawQuery(query , null);
+        Difficulty difficulty = null;
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                // Now, the cursor is positioned at the first row
+                // Set the values
+                String name = cursor.getString(1);
+                difficulty = new Difficulty(id, name);
+            }
+            cursor.close(); // Don't forget to close the cursor when you're done with it
+        }
+        return difficulty;
     }
 
     // OBSERVATION CRUD

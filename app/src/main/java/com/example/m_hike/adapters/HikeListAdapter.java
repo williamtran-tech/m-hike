@@ -18,6 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
@@ -35,6 +37,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.m_hike.R;
 import com.example.m_hike.activities.HikeDetailsActivity;
 import com.example.m_hike.activities.fragments.AddFragment;
+import com.example.m_hike.activities.fragments.HomeFragment;
 import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.models.Difficulty;
 import com.example.m_hike.models.Hike;
@@ -48,12 +51,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
-public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHolder> {
+public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHolder> implements Filterable {
     private ArrayList<Hike> hikeList;
     private final Context context;
     private Hike deletedHike;
     private DatePickerDialog datePickerDialog;
+    private Calendar updatedDate;
     private TextView dateEditTxt;
     public HikeListAdapter(Context context,ArrayList<Hike> hikeList) {
         this.hikeList = hikeList;
@@ -70,7 +75,6 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
     public int getItemCount() {
         return hikeList.size();
     }
-
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull HikeListAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
@@ -150,7 +154,6 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
                     intent.putExtra("description", hike1.getDescription());
                 } else {
                     intent.putExtra("description", "");
-                    Log.d("Empty", "Cac");
                 }
                 view.getContext().startActivity(intent);
             }
@@ -158,6 +161,7 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
 
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             Activity activity = (Activity) context;
+            @SuppressLint("NotifyDataSetChanged")
             @Override
             public boolean onLongClick(View view) {
                 Log.d("Long click", "Long click");
@@ -168,21 +172,27 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
                 builder.setPositiveButton("Update", (dialog, which) -> {
                     // Handle the update action here
                     // Show another dialog to update caption
-                    AlertDialog.Builder updateCaptionBuilder = new AlertDialog.Builder(context);
-                    updateCaptionBuilder.setTitle("Update Hike Details");
 
-                    LayoutInflater inflater = activity.getLayoutInflater();
-                    View layout = inflater.inflate(R.layout.update_hike, null);
-                    updateCaptionBuilder.setView(layout);
-                    EditText nameEdit = layout.findViewById(R.id.nameEditTxt);
-                    dateEditTxt = layout.findViewById(R.id.editTextDate);
-                    RadioGroup radioGroup = layout.findViewById(R.id.parkingRadioGroup);
-                    EditText locationEdit = layout.findViewById(R.id.locationEditTxt);
-                    EditText durationEdit = layout.findViewById(R.id.durationEditTxt);
-                    EditText distanceEdit = layout.findViewById(R.id.distanceEditTxt);
-                    RatingBar ratingBar = layout.findViewById(R.id.ratingBar);
+                    View layout = activity.getLayoutInflater().inflate(R.layout.update_hike, null);
+                    AlertDialog.Builder updateDialogBuilder = new AlertDialog.Builder(context);
+                    updateDialogBuilder.setView(layout);
+
+                    AlertDialog updateDialog = updateDialogBuilder.create();
+
+                    updateDialog.getWindow().setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.round_dialog));
+                    updateDialog.show();
+
+                    EditText nameEdit = updateDialog.findViewById(R.id.nameEditTxt);
+                    dateEditTxt = updateDialog.findViewById(R.id.editTextDate);
+
+                    RadioGroup radioGroup = updateDialog.findViewById(R.id.parkingRadioGroup);
+                    EditText locationEdit = updateDialog.findViewById(R.id.locationEditTxt);
+                    EditText durationEdit = updateDialog.findViewById(R.id.durationEditTxt);
+                    EditText distanceEdit = updateDialog.findViewById(R.id.distanceEditTxt);
+                    RatingBar ratingBar = updateDialog.findViewById(R.id.ratingBar);
                     Log.d("Hike", hike.getName());
                     nameEdit.setText(hike.getName());
+                    Log.d("Date:", hike.getDate().toString());
                     // Simple date format
                     String outputDate = "";
                     SimpleDateFormat inputFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
@@ -207,49 +217,86 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
                     ratingBar.setRating(hike.getDifficulty().getId());
                     boolean availableParking = radioGroup.getCheckedRadioButtonId() == R.id.yesRadioButton;
 
-
                     dateEditTxt.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             // Get day month, year of hike
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTime(hike.getDate());
-                            int year = calendar.get(Calendar.YEAR);
-                            int month = calendar.get(Calendar.MONTH);
-                            int day = calendar.get(Calendar.DAY_OF_MONTH);
+                            updatedDate = Calendar.getInstance();
+                            updatedDate.setTime(hike.getDate());
+                            int year = updatedDate.get(Calendar.YEAR);
+                            int month = updatedDate.get(Calendar.MONTH);
+                            int day = updatedDate.get(Calendar.DAY_OF_MONTH);
+
                             openDatePickerDialog(year, month, day);
                         }
                     });
 
-                    updateCaptionBuilder.setPositiveButton("Update", (dialog1, which1) -> {
-                        // Update the caption
-                        Hike updatedHike = null;
-                        String dateStr = dateEditTxt.getText().toString();
+                    AppCompatButton saveBtn = updateDialog.findViewById(R.id.saveBtn);
+                    saveBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Update the caption
+                            Hike updatedHike = null;
+                            // parse String date to db
+                            Date date;
+                            if (updatedDate != null) {
+                                date = updatedDate.getTime();
+                            } else {
+                                date = hike.getDate();
+                            }
+                            try {
+                                updatedHike = DatabaseHelper.updateHike(hike.getId(), nameEdit.getText().toString(), date, locationEdit.getText().toString(), availableParking, Float.parseFloat(durationEdit.getText().toString()), Float.parseFloat(distanceEdit.getText().toString()), (int) ratingBar.getRating(), hike.getDescription(),null);
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
+                            }
+                            Log.d("Update hike Successfully", String.valueOf(updatedHike.getName()));
+                            updatedDate = null;
+                            // Update the hike in the list
+                            try {
+                                hikeList = DatabaseHelper.getHikes();
+                                // Sort hikes by date
+                                hikeList.sort((hike1, hike2) -> hike2.getDate().compareTo(hike1.getDate()));
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
+                            }
+                            notifyDataSetChanged();
 
-                        try {
-                            updatedHike = DatabaseHelper.updateHike(hike.getId(), nameEdit.getText().toString(), hike.getDate(), locationEdit.getText().toString(), availableParking, Float.parseFloat(durationEdit.getText().toString()), Float.parseFloat(distanceEdit.getText().toString()), (int) ratingBar.getRating(), hike.getDescription(),null);
-                        } catch (ParseException e) {
-                            throw new RuntimeException(e);
+                            Toast.makeText(context, "Hike details updated", Toast.LENGTH_SHORT - 500).show();
+                            updateDialog.dismiss();
                         }
-                        Log.d("Update hike Successfully", String.valueOf(updatedHike.getName()));
-
-                        // Update the hike in the list
-                        hikeList.remove(position);
-                        hikeList.add(position, updatedHike);
-                        notifyItemChanged(position);
-                        notifyItemRangeChanged(position, hikeList.size());
-                        try {
-                            hikeList = DatabaseHelper.getHikes();
-                        } catch (ParseException e) {
-                            throw new RuntimeException(e);
-                        }
-
-                        Toast.makeText(context, "Hike details updated", Toast.LENGTH_SHORT - 500).show();
                     });
-                    updateCaptionBuilder.setNegativeButton("Cancel", (dialog1, which1) -> {
-                        // Handle nothing
-                    });
-                    updateCaptionBuilder.show();
+//                    updateCaptionBuilder.setPositiveButton("Update", (dialog1, which1) -> {
+//                        // Update the caption
+//                        Hike updatedHike = null;
+//                        String dateStr = dateEditTxt.getText().toString();
+//                        // parse String date to db
+//                        Date date;
+//                        if (updatedDate != null) {
+//                            date = updatedDate.getTime();
+//                        } else {
+//                            date = hike.getDate();
+//                        }
+//                        try {
+//                            updatedHike = DatabaseHelper.updateHike(hike.getId(), nameEdit.getText().toString(), date, locationEdit.getText().toString(), availableParking, Float.parseFloat(durationEdit.getText().toString()), Float.parseFloat(distanceEdit.getText().toString()), (int) ratingBar.getRating(), hike.getDescription(),null);
+//                        } catch (ParseException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                        Log.d("Update hike Successfully", String.valueOf(updatedHike.getName()));
+//                        updatedDate = null;
+//                        // Update the hike in the list
+//                        try {
+//                            hikeList = DatabaseHelper.getHikes();
+//                        } catch (ParseException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                        notifyDataSetChanged();
+//
+//                        Toast.makeText(context, "Hike details updated", Toast.LENGTH_SHORT - 500).show();
+//                    });
+//                    updateCaptionBuilder.setNegativeButton("Cancel", (dialog1, which1) -> {
+//                        // Handle nothing
+//                    });
+                    updateDialog.show();
                 });
                 builder.setNegativeButton("Delete", (dialog, which) -> {
                     // Handle the delete action here
@@ -317,6 +364,7 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
                             // This is the key for motherfacker RecyclerView not messing up the ID of the hike
                             try {
                                 hikeList = DatabaseHelper.getHikes();
+                                hikeList.sort((hike1, hike2) -> hike2.getDate().compareTo(hike1.getDate()));
                             } catch (ParseException e) {
                                 throw new RuntimeException(e);
                             }
@@ -324,7 +372,6 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
                         }
                     });
                 });
-
                 builder.setNeutralButton("Cancel", (dialog, which) -> {
                     // Handle nothing
                 });
@@ -333,6 +380,46 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
                 return true;
             }
         });
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String searchTxt = charSequence.toString();
+                if (searchTxt.isEmpty()) {
+                    try {
+                        if (HomeFragment.filter != null) {
+                            hikeList = DatabaseHelper.getHikesByDifficulty(HomeFragment.filter);
+                        } else {
+                            hikeList = DatabaseHelper.getHikes();
+                        }
+                        // Sort hikes by date
+                        hikeList.sort((hike1, hike2) -> hike2.getDate().compareTo(hike1.getDate()));
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    ArrayList<Hike> filteredList = new ArrayList<>();
+                    for (Hike hike : hikeList) {
+                        if (hike.getName().toLowerCase().contains(searchTxt.toLowerCase())) {
+                            filteredList.add(hike);
+                        }
+                    }
+                    hikeList = filteredList;
+                }
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = hikeList;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                hikeList = (ArrayList<Hike>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -360,6 +447,7 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
                 String outputDate = dateFormat.format(date);
                 dateEditTxt.setText(outputDate);
+                updatedDate.setTime(date);
             }
         }, year, month, day);
 

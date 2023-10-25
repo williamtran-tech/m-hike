@@ -8,12 +8,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Geocoder;
 import android.location.LocationManager;
 import android.os.Bundle;
 
 import android.location.Location;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
@@ -41,6 +43,12 @@ import com.example.m_hike.R;
 import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.models.Hike;
 import com.example.m_hike.services.LocationAddress;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
@@ -48,6 +56,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.zip.Inflater;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -60,7 +69,11 @@ import com.google.android.gms.tasks.Task;
 
 public class AddFragment extends Fragment {
     private DatabaseHelper dbHelper;
-    private TextView date;
+    private TextView dateEditTxt;
+    private Calendar saveDate;
+    private DatePickerDialog datePickerDialog;
+    private MapView mapView;
+    private GoogleMap ggMap;
 
     FusedLocationProviderClient mFusedLocationClient;
     int PERMISSION_ID = 44;
@@ -82,15 +95,15 @@ public class AddFragment extends Fragment {
         View addFragmentView = inflater.inflate(R.layout.fragment_add, container, false);
 
         dbHelper = new DatabaseHelper(getActivity().getBaseContext());
-        date = (TextView) addFragmentView.findViewById(R.id.editTextDate);
+        dateEditTxt = (TextView) addFragmentView.findViewById(R.id.editTextDate);
         Calendar cal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd/MM/yyyy");
-        date.setText(sdf.format(cal.getTime()));
-        date.setOnClickListener(new View.OnClickListener() {
+        saveDate = cal;
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy");
+        dateEditTxt.setText(sdf.format(cal.getTime()));
+        dateEditTxt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DialogFragment datePicker = new DatePickerDialogTheme();
-                datePicker.show(getFragmentManager(), "date picker");
+                openDatePickerDialog(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
             }
         }
         );
@@ -144,6 +157,9 @@ public class AddFragment extends Fragment {
     }
 
     private void saveDetails() throws ParseException {
+        // Hide keyboard
+        InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
         EditText nameTxt = getActivity().findViewById(R.id.nameEditTxt);
         TextView date = getActivity().findViewById(R.id.editTextDate);
         EditText locationTxt = getActivity().findViewById(R.id.locationEditTxt);
@@ -153,34 +169,21 @@ public class AddFragment extends Fragment {
         RadioGroup radioGroup = getActivity().findViewById(R.id.parkingRadioGroup);
 
         String name = nameTxt.getText().toString();
-        // extract the date from the text view
-        String dateStr = date.getText().toString();
-        String d1 = dateStr.substring(dateStr.substring(0, dateStr.indexOf(", ")).length() + 2, dateStr.length());
-        // convert the date string to date object
-        Date dateObj = null;
-        try {
-            dateObj = new SimpleDateFormat("dd/MM/yyyy").parse(d1);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
         String location = locationTxt.getText().toString();
         boolean availableParking = radioGroup.getCheckedRadioButtonId() == R.id.yesRadioButton;
         int rating = (int) ratingBar.getRating();
-        if (name.isEmpty() || dateStr.isEmpty() || location.isEmpty() || duration.getText().toString().isEmpty() || distance.getText().toString().isEmpty() || rating == 0) {
+        if (name.isEmpty() || location.isEmpty() || duration.getText().toString().isEmpty() || distance.getText().toString().isEmpty() || rating == 0) {
             Toast.makeText(getActivity(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
             return;
         }
         Float durationFloat = Float.parseFloat(duration.getText().toString());
         Float distanceFloat = Float.parseFloat(distance.getText().toString());
-        Hike hike = dbHelper.insertHike(name, dateObj, location, availableParking, rating, durationFloat, distanceFloat);
+        Hike hike = dbHelper.insertHike(name, saveDate.getTime(), location, availableParking, rating, durationFloat, distanceFloat);
 
 
         // Make the device vibrate
         Vibrator vibrator = (Vibrator) getActivity().getBaseContext().getSystemService(getActivity().getBaseContext().VIBRATOR_SERVICE);
         vibrator.vibrate(400);
-
-        // Notify
-        Toast.makeText(getActivity(), "Hikes " + hike.getName() + " added successfully", Toast.LENGTH_SHORT - 500).show();
 
         // Clear fields
         nameTxt.setText("");
@@ -191,41 +194,12 @@ public class AddFragment extends Fragment {
 
         Log.d("Get Hikes:", dbHelper.getHikes().toString());
 
-        // Hide keyboard
-        InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
-
         // Go to home fragment
         Fragment homeFragment = new HomeFragment();
         // add transition
         getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right).replace(R.id.fragment_container, homeFragment).commit();
-    }
-
-    public static class DatePickerDialogTheme extends DialogFragment implements DatePickerDialog.OnDateSetListener {
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            final Calendar calendar = Calendar.getInstance();
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datepickerdialog = new DatePickerDialog(getActivity(),
-                    AlertDialog.THEME_DEVICE_DEFAULT_DARK,this,year,month,day);
-            return datepickerdialog;
-        }
-
-        @Override
-        public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-            TextView date = getActivity().findViewById(R.id.editTextDate);
-            // Get the date of week
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(year, month, day);
-            int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-            String dayOfWeekString = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, getActivity().getResources().getConfiguration().locale);
-
-            date.setText(dayOfWeekString + ", " + day + "/" + (month + 1) + "/" + year);
-        }
+        // Notify
+        Toast.makeText(getActivity(), "Hikes " + hike.getName() + " added successfully", Toast.LENGTH_SHORT - 500).show();
     }
 
 //    LOCATION
@@ -259,6 +233,56 @@ public class AddFragment extends Fragment {
                             }
 //                            EditText locationTxt = getActivity().findViewById(R.id.locationEditTxt);
 //                            locationTxt.setText("Latitude:" + coordinates[0] + ", longitude:" + coordinates[1]);
+
+                            // Open google maps dialog
+                            View googleMapsDialogView = getLayoutInflater().inflate(R.layout.map_dialog, null);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setView(googleMapsDialogView);
+                            AlertDialog dialog = builder.create();
+                            dialog.getWindow().setBackgroundDrawable(getActivity().getDrawable(R.drawable.round_dialog));
+                            dialog.show();
+
+                            AppCompatButton saveBtn = dialog.findViewById(R.id.saveBtn);
+                            TextView locationTxtView = dialog.findViewById(R.id.locationTxt);
+                            locationTxtView.setText(address);
+
+                            // Set the map
+                            MapView mapView = googleMapsDialogView.findViewById(R.id.mapView);
+                            mapView.onCreate(null);
+                            mapView.onResume();
+
+                            mapView.getMapAsync(new OnMapReadyCallback() {
+                                @Override
+                                public void onMapReady(@NonNull GoogleMap googleMap) {
+                                    LatLng initialLocation = new LatLng(location.getLatitude(), location.getLongitude()); // San Francisco
+                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLocation, 15)); // 15 is the zoom level
+                                    googleMap.clear();
+                                    markLocation(googleMap,initialLocation, "Location");
+                                    Geocoder geocoder = new Geocoder(getActivity().getBaseContext(), getResources().getConfiguration().locale);
+
+                                    googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                                        @Override
+                                        public void onMapClick(LatLng latLng) {
+                                            googleMap.clear();
+                                            markLocation(googleMap,latLng, "Location");
+                                            String address = LocationAddress.getAddressFromLocation(getActivity().getBaseContext(), latLng.latitude, latLng.longitude);
+                                            if (address != null) {
+                                                locationTxtView.setText(address);
+                                            } else {
+                                                Toast.makeText(getActivity(), "Address not found", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                            saveBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    EditText locationTxt = getActivity().findViewById(R.id.locationEditTxt);
+                                    locationTxt.setText(locationTxtView.getText().toString());
+                                    dialog.dismiss();
+                                }
+                            });
                         }
                     }
                 });
@@ -271,6 +295,13 @@ public class AddFragment extends Fragment {
             // if permissions aren't available,
             // request for permissions
             requestPermissions();
+        }
+    }
+
+    public void markLocation(GoogleMap ggMap, LatLng location, String title){
+        if (ggMap != null) {
+            // Add a marker at the specified location with the given title
+            ggMap.addMarker(new MarkerOptions().position(location).title(title));
         }
     }
 
@@ -292,7 +323,6 @@ public class AddFragment extends Fragment {
     }
 
     public LocationCallback mLocationCallback = new LocationCallback() {
-
         @Override
         public void onLocationResult(LocationResult locationResult) {
             Location mLastLocation = locationResult.getLastLocation();
@@ -332,5 +362,33 @@ public class AddFragment extends Fragment {
                 getLastLocation();
             }
         }
+    }
+
+    private void openDatePickerDialog(int year, int month, int day) {
+        // Get the current date
+        Calendar calendar = Calendar.getInstance();
+
+        // Create a DatePickerDialog and set the date set listener
+        datePickerDialog = new DatePickerDialog(this.getContext(), new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int selectedYear, int selectedMonth, int selectedDay) {
+                // Handle the selected date
+                String selectedDate = selectedYear + "-" + (selectedMonth + 1) + "-" + selectedDay;
+                SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+                Date date = null;
+                try {
+                    date = inputFormat.parse(selectedDate);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
+                String outputDate = dateFormat.format(date);
+                dateEditTxt.setText(outputDate);
+                saveDate.setTime(date);
+            }
+        }, year, month, day);
+
+        // Show the DatePickerDialog
+        datePickerDialog.show();
     }
 }
