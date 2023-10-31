@@ -1,7 +1,9 @@
 package com.example.m_hike.activities.fragments;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.m_hike.R;
+import com.example.m_hike.database.DatabaseHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class SettingFragment extends Fragment {
@@ -31,7 +34,31 @@ public class SettingFragment extends Fragment {
         Menu menu = navBar.getMenu();
         MenuItem menuItem = menu.getItem(2);
         menuItem.setChecked(true);
+        View settingFragmentView = inflater.inflate(R.layout.fragment_setting, container, false);
+
+        AppCompatButton resetBtn = settingFragmentView.findViewById(R.id.resetDataBtn);
+        resetBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Display a dialog to confirm the reset
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+                builder.setTitle("Reset Data");
+                builder.setMessage("Are you sure you want to reset all data?");
+                builder.setPositiveButton("Yes", (dialog, which) -> {
+                    // TODO: Reset data
+//                    DatabaseHelper.resetDatabase();
+                });
+                builder.setNegativeButton("Cancel", (dialog, which) -> {
+                    // Do nothing
+                });
+
+                builder.create().show();
+            }
+        });
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_setting, container, false);
+        return settingFragmentView;
+
     }
 }

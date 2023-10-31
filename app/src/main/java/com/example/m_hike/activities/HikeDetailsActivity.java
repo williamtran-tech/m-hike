@@ -32,19 +32,25 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.m_hike.R;
+import com.example.m_hike.adapters.ObservationGridAdapter;
 import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.models.Difficulty;
 import com.example.m_hike.models.Hike;
@@ -287,137 +293,29 @@ public class HikeDetailsActivity extends AppCompatActivity {
 
     private void displayObservations() {
         ArrayList<Observation> observations = DatabaseHelper.getObservations(hikeId);
+        if (observations.size() > 0) {
+            // Display as a grid
+            GridView observationGrid = findViewById(R.id.observationGrid);
+            ObservationGridAdapter adapter = new ObservationGridAdapter(observations, this);
+            observationGrid.setAdapter(adapter);
 
-        // Display
-        LinearLayout observationList = findViewById(R.id.observationList);
-        for (Observation observation : observations) {
-            View observationView = getLayoutInflater().inflate(R.layout.observation_item, null);
-            TextView caption = observationView.findViewById(R.id.caption);
-            caption.setText(observation.getCaption());
-            ImageView observationPicture = observationView.findViewById(R.id.observationPicture);
-            TextView date = observationView.findViewById(R.id.date);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm");
-            String outputDate = dateFormat.format(observation.getDate());
-            date.setText(outputDate);
-            if (observation.getImage() != null) {
-                // Change size of the image
-                // from byte[] to Bitmap
-                // This is the image from path
-                // Store the image in the database
-                byte[] imageByte = observation.getImage();
-                // Turn the image into a bitmap
-                Bitmap bitmap = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                Bitmap rotateImage = rotateImage(bitmap, 90);
-                // Display the image with rotated image
-                observationPicture.setImageBitmap(rotateImage);
-                Log.d("Image", bitmap.toString());
-            } else {
-                observationPicture.setVisibility(View.GONE);
-            }
-            observationView.setOnLongClickListener(new View.OnLongClickListener() {
+            // Set the height of the grid -> Cause the grid to scroll (GridView inside Scroll View)
+            setGridViewHeightBasedOnChildren(observationGrid, 3);
+            observationGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
-                public boolean onLongClick(View view) {
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Log.d("Observation", String.valueOf(i));
+                    // New intent to display the observation
+                    Intent intent = new Intent(HikeDetailsActivity.this, ObservationsActivity.class);
+                    intent.putExtra("observationId", observations.get(i).getId());
+                    intent.putExtra("hikeId", hikeId);
 
-                    // Display a dialog to confirm
-                    // Delete the observation
-                    AlertDialog.Builder builder = new AlertDialog.Builder(HikeDetailsActivity.this);
-                    builder.setTitle("Edit Observation");
-                    builder.setPositiveButton("Update", (dialog, which) -> {
-                        // Handle the update action here
-                        // Show another dialog to update caption
-                        AlertDialog.Builder updateCaptionBuilder = new AlertDialog.Builder(HikeDetailsActivity.this);
-                        updateCaptionBuilder.setTitle("Update Caption");
-                        EditText captionEdit = new EditText(HikeDetailsActivity.this);
-                        captionEdit.setText(observation.getCaption());
-                        updateCaptionBuilder.setView(captionEdit);
-
-                        updateCaptionBuilder.setPositiveButton("Update", (dialog1, which1) -> {
-                            // Update the caption
-                            Observation updatedObservation = null;
-                            try {
-                                updatedObservation = DatabaseHelper.updateObservation(observation.getId(), captionEdit.getText().toString(), observation.getDate(), observation.getImage(), observation.getLongitude(), observation.getLatitude(), observation.getHike().getId(), null);
-                            } catch (ParseException e) {
-                                throw new RuntimeException(e);
-                            }
-                            // Remove the old list and add the new one
-                            observationList.removeAllViews();
-                            displayObservations();
-                            Log.d("Update caption Successfully", String.valueOf(updatedObservation.getId()));
-                        });
-                        updateCaptionBuilder.setNegativeButton("Cancel", (dialog1, which1) -> {
-                            // Handle nothing
-                        });
-
-
-                        updateCaptionBuilder.show();
-                    });
-
-                    builder.setNegativeButton("Delete", (dialog, which) -> {
-                        // Handle the delete action here
-                        Observation deletedObservation = DatabaseHelper.deleteObservation(observation.getId());
-                        // Remove the old list and add the new one
-                        observationList.removeAllViews();
-                        displayObservations();
-
-                        Log.d("Deleted Observation Successfully", String.valueOf(deletedObservation.getId()));
-                        // Display a button undo the delete action
-                        ConstraintLayout undoBtn = findViewById(R.id.undoBtn);
-                        undoBtn.setVisibility(View.VISIBLE);
-                        ProgressBar progressBar = findViewById(R.id.progressBar);
-                        AppCompatButton undoButton = findViewById(R.id.undoButton);
-                        progressBar.setVisibility(View.VISIBLE);
-                        progressBar.setMax(3000);
-                        progressBar.setProgress(0);
-                        CountDownTimer countDownTimer = new CountDownTimer(3000, 10) {
-                            @Override
-                            public void onTick(long millisUntilFinished) {
-                                // Update the progress bar with the countdown
-                                // Calculate the remaining time and update the progress bar
-                                int remainingTime = (int) millisUntilFinished;
-                                progressBar.setProgress(remainingTime);
-                            }
-
-                            @Override
-                            public void onFinish() {
-                                // Countdown is complete, show the Undo button
-                                progressBar.setVisibility(View.INVISIBLE);
-                                undoBtn.setVisibility(View.GONE);
-                                DatabaseHelper.forceDeleteObservation(deletedObservation.getId());
-                            }
-                        };
-                        countDownTimer.start();
-
-                        undoButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Log.d("Undo Delete Observation", String.valueOf(deletedObservation.getId()));
-                                // Undo the delete action
-                                try {
-                                    DatabaseHelper.updateObservation(deletedObservation.getId(), deletedObservation.getCaption(), deletedObservation.getDate(), deletedObservation.getImage(), deletedObservation.getLongitude(), deletedObservation.getLatitude(), deletedObservation.getHike().getId(), null);
-                                } catch (ParseException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                // Cancel the countdown
-                                countDownTimer.cancel();
-                                // Hide the undo button
-                                progressBar.setVisibility(View.INVISIBLE);
-                                undoBtn.setVisibility(View.GONE);
-                                // Remove the old list and add the new one
-                                observationList.removeAllViews();
-                                displayObservations();
-                            }
-                        });
-                    });
-
-                    builder.setNeutralButton("Cancel", (dialog, which) -> {
-                        // Handle nothing
-                    });
-                    builder.show();
-
-                    return true;
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }
             });
-            observationList.addView(observationView);
+        } else {
+            // Display nothing
         }
     }
 
@@ -593,7 +491,6 @@ public class HikeDetailsActivity extends AppCompatActivity {
         // TODO: Save to the database
         Date currentDate = new Date();
 
-        LinearLayout observationList = findViewById(R.id.observationList);
         View observationView = getLayoutInflater().inflate(R.layout.observation_item, null);
         TextView captionTxt = observationView.findViewById(R.id.caption);
         captionTxt.setText(caption);
@@ -625,7 +522,6 @@ public class HikeDetailsActivity extends AppCompatActivity {
             }
         }
         // Remove the old list and add the new one
-        observationList.removeAllViews();
         displayObservations();
 
         // Clear the text
@@ -709,5 +605,34 @@ public class HikeDetailsActivity extends AppCompatActivity {
         int k = Integer.highestOneBit((int)Math.floor(ratio));
         if(k==0) return 1;
         else return k;
+    }
+
+    public void setGridViewHeightBasedOnChildren(GridView gridView, int columns) {
+        ListAdapter listAdapter = gridView.getAdapter();
+        if (listAdapter == null) {
+            // pre-condition
+            return;
+        }
+
+        int totalHeight = 0;
+        int items = listAdapter.getCount();
+        int rows = 0;
+
+        View listItem = listAdapter.getView(0, null, gridView);
+        listItem.measure(0, 0);
+        totalHeight = listItem.getMeasuredHeight();
+
+        float x = 1;
+        if( items > columns ){
+            x = items/columns;
+            rows = (int) (x + 1);
+            totalHeight *= rows;
+        }
+
+        ViewGroup.LayoutParams params = gridView.getLayoutParams();
+
+        params.height = totalHeight;
+        gridView.setLayoutParams(params);
+
     }
 }

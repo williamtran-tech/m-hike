@@ -265,37 +265,6 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
                             updateDialog.dismiss();
                         }
                     });
-//                    updateCaptionBuilder.setPositiveButton("Update", (dialog1, which1) -> {
-//                        // Update the caption
-//                        Hike updatedHike = null;
-//                        String dateStr = dateEditTxt.getText().toString();
-//                        // parse String date to db
-//                        Date date;
-//                        if (updatedDate != null) {
-//                            date = updatedDate.getTime();
-//                        } else {
-//                            date = hike.getDate();
-//                        }
-//                        try {
-//                            updatedHike = DatabaseHelper.updateHike(hike.getId(), nameEdit.getText().toString(), date, locationEdit.getText().toString(), availableParking, Float.parseFloat(durationEdit.getText().toString()), Float.parseFloat(distanceEdit.getText().toString()), (int) ratingBar.getRating(), hike.getDescription(),null);
-//                        } catch (ParseException e) {
-//                            throw new RuntimeException(e);
-//                        }
-//                        Log.d("Update hike Successfully", String.valueOf(updatedHike.getName()));
-//                        updatedDate = null;
-//                        // Update the hike in the list
-//                        try {
-//                            hikeList = DatabaseHelper.getHikes();
-//                        } catch (ParseException e) {
-//                            throw new RuntimeException(e);
-//                        }
-//                        notifyDataSetChanged();
-//
-//                        Toast.makeText(context, "Hike details updated", Toast.LENGTH_SHORT - 500).show();
-//                    });
-//                    updateCaptionBuilder.setNegativeButton("Cancel", (dialog1, which1) -> {
-//                        // Handle nothing
-//                    });
                     updateDialog.show();
                 });
                 builder.setNegativeButton("Delete", (dialog, which) -> {

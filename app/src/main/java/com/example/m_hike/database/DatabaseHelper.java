@@ -328,4 +328,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return new Observation(id, caption, date.toString(), image, longitude, latitude, hikeId);
     }
+
+    public static boolean resetDatabase() {
+        database.execSQL("DROP table IF EXISTS " + HIKE.HikeEntry.TABLE_NAME);
+        database.execSQL("DROP table IF EXISTS " + OBSERVATION.ObservationEntry.TABLE_NAME);
+
+        database.execSQL(HIKE.HikeEntry.CREATE_QUERY);
+        database.execSQL(OBSERVATION.ObservationEntry.CREATE_QUERY);
+        return true;
+    }
 }
