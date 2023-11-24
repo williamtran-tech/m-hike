@@ -11,7 +11,6 @@ import com.example.m_hike.models.Hike;
 import com.example.m_hike.models.Observation;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -36,7 +35,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d("Create Query", HIKE.HikeEntry.TABLE_NAME);
         Log.d("Database", "Created");
         seedDifficulties(db);
-//        Log.d("Get Difficulties", getDifficulties(db).toString());
     }
 
     @Override

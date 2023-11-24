@@ -50,6 +50,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.m_hike.R;
+import com.example.m_hike.activities.fragments.HomeFragment;
 import com.example.m_hike.adapters.ObservationGridAdapter;
 import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.models.Difficulty;
@@ -72,6 +73,7 @@ import java.util.Vector;
 public class HikeDetailsActivity extends AppCompatActivity {
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 2;
     private static final int SELECT_IMAGE = 1;
+    private static final int OBSERVATION_REQUEST_CODE = 3;
     private int hikeId;
     private Date hikeDate;
 
@@ -80,10 +82,15 @@ public class HikeDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hike_details);
 
+        boolean isChanged = getIntent().getBooleanExtra("isChanged", false);
+        hikeId = getIntent().getIntExtra("hikeId", 0);
+        if (isChanged) {
+            Toast.makeText(this, "Observation changed", Toast.LENGTH_SHORT - 300).show();
+        }
+
         getSupportActionBar().hide();
         displayHikeDetails();
         displayObservations();
-
         updateDescription();
         updateObservation();
 
@@ -93,8 +100,8 @@ public class HikeDetailsActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // Go back
                 // Add transition animation
-                Intent intent  = new Intent(HikeDetailsActivity.this, MainActivity.class);
-                startActivity(intent);
+                // Starting the Observation Activity
+                Intent intent = new Intent(HikeDetailsActivity.this, MainActivity.class);
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 finish();
             }
@@ -122,28 +129,35 @@ public class HikeDetailsActivity extends AppCompatActivity {
         }
     }
 
+    public String currentPhotoPath;
+
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == OBSERVATION_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                // Remove the old list if any changed
+                displayObservations();
+            }
+        }
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                File file = new File(currentPhotoPath);
 
                 Toast.makeText(this, "Image Captured", Toast.LENGTH_SHORT - 300).show();
                 // Show preview observation
                 Log.d("CurrentPhotoPath", currentPhotoPath);
                 if (currentPhotoPath != null) {
+                    File file = new File(currentPhotoPath);
                     // Show preview observation
                     CardView observationPreview = findViewById(R.id.observationPreview);
                     ImageView observationPicturePreview = findViewById(R.id.observationPicPreview);
                     Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
                     Bitmap rotateImage = rotateImage(bitmap, 90);
-
                     observationPicturePreview.setImageBitmap(rotateImage);
                     observationPreview.setVisibility(View.VISIBLE);
+
                     TextView caption = findViewById(R.id.observationCaptionPreview);
                     EditText captionEdit = findViewById(R.id.observationEditTxt);
                     caption.setText(captionEdit.getText().toString());
-
                 }
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "Camera permission is Required", Toast.LENGTH_SHORT - 300).show();
@@ -169,13 +183,12 @@ public class HikeDetailsActivity extends AppCompatActivity {
                         int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
                         CardView observationPreview = findViewById(R.id.observationPreview);
+                        observationPreview.setVisibility(View.VISIBLE);
                         ImageView observationPicturePreview = findViewById(R.id.observationPicPreview);
                         observationPicturePreview.setImageBitmap(bitmap);
-                        observationPreview.setVisibility(View.VISIBLE);
                         TextView caption = findViewById(R.id.observationCaptionPreview);
                         EditText captionEdit = findViewById(R.id.observationEditTxt);
                         caption.setText(captionEdit.getText().toString());
-
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -186,7 +199,6 @@ public class HikeDetailsActivity extends AppCompatActivity {
         }
     }
 
-    String currentPhotoPath;
     private File createImageFile() throws IOException {
         // Create an image file name
         String imageFileName = "JPEG_" + System.currentTimeMillis() + "_";
@@ -296,6 +308,7 @@ public class HikeDetailsActivity extends AppCompatActivity {
         if (observations.size() > 0) {
             // Display as a grid
             GridView observationGrid = findViewById(R.id.observationGrid);
+            observationGrid.setVisibility(View.VISIBLE);
             ObservationGridAdapter adapter = new ObservationGridAdapter(observations, this);
             observationGrid.setAdapter(adapter);
 
@@ -304,18 +317,19 @@ public class HikeDetailsActivity extends AppCompatActivity {
             observationGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Log.d("Observation", String.valueOf(i));
                     // New intent to display the observation
                     Intent intent = new Intent(HikeDetailsActivity.this, ObservationsActivity.class);
                     intent.putExtra("observationId", observations.get(i).getId());
                     intent.putExtra("hikeId", hikeId);
 
-                    startActivity(intent);
+                    startActivityForResult(intent, OBSERVATION_REQUEST_CODE);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }
             });
         } else {
             // Display nothing
+            GridView observationGrid = findViewById(R.id.observationGrid);
+            observationGrid.setVisibility(View.GONE);
         }
     }
 
@@ -458,7 +472,6 @@ public class HikeDetailsActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // Save observation
                 observation.clearFocus();
-                observationPreview.removeAllViews();
                 observationPreview.setVisibility(View.GONE);
 
                 Log.d("HikeId", String.valueOf(hikeId));
@@ -516,7 +529,6 @@ public class HikeDetailsActivity extends AppCompatActivity {
         } else {
             try {
                 DatabaseHelper.insertObservation(caption, currentDate, null, 0, 0, hikeId);
-                observationPicture.setVisibility(View.GONE);
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -527,6 +539,8 @@ public class HikeDetailsActivity extends AppCompatActivity {
         // Clear the text
         EditText observation = findViewById(R.id.observationEditTxt);
         observation.setText("");
+        CardView observationPreview = findViewById(R.id.observationPreview);
+        observationPreview.setVisibility(View.GONE);
     }
 
     public static final byte[] getBytesFromImagePath(String imagePath) {

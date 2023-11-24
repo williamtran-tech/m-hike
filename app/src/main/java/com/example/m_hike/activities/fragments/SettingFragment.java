@@ -11,6 +11,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.m_hike.R;
 import com.example.m_hike.database.DatabaseHelper;
@@ -47,7 +49,8 @@ public class SettingFragment extends Fragment {
                 builder.setMessage("Are you sure you want to reset all data?");
                 builder.setPositiveButton("Yes", (dialog, which) -> {
                     // TODO: Reset data
-//                    DatabaseHelper.resetDatabase();
+                    DatabaseHelper.resetDatabase();
+                    Toast.makeText(getContext(), "Data reset successfully", Toast.LENGTH_SHORT).show();
                 });
                 builder.setNegativeButton("Cancel", (dialog, which) -> {
                     // Do nothing

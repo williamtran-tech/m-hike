@@ -1,14 +1,10 @@
 package com.example.m_hike.activities.fragments;
 
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,9 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.example.m_hike.R;
 import com.example.m_hike.adapters.HikeListAdapter;
@@ -34,10 +28,8 @@ import com.example.m_hike.database.DatabaseHelper;
 import com.example.m_hike.models.Difficulty;
 import com.example.m_hike.models.Hike;
 import com.example.m_hike.modules.CompassHandler;
-import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -137,6 +129,7 @@ public class HomeFragment extends Fragment {
         try {
             if (!dbHelper.getHikes().isEmpty()) {
                 // Search for hikes
+                spinner.setVisibility(View.VISIBLE);
                 searchHike.addTextChangedListener(new TextWatcher() {
                       @Override
                       public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -158,6 +151,7 @@ public class HomeFragment extends Fragment {
                   }
                 );
             } else {
+                spinner.setVisibility(View.GONE);
                 searchHike.setVisibility(View.GONE);
                 homeBackground.setVisibility(View.GONE);
                 CardView cardView = homeFragmentView.findViewById(R.id.emptyView);

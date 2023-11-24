@@ -4,7 +4,7 @@
     <string name="location">Location</string>
     <string name="email">Email</string>
     <string name="save_details">Save Details</string>
-    <string name="description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris auctor tortor eu lectus egestas, aliquet euismod nibh egestas.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris auctor tortor eu lectus egestas, aliquet euismod nibh egestas.</string>
+    <string name="description">Embark on your hiking adventures with our Hike Management app. Plan routes, track your journey and adding observations into your hiking. Your ultimate companion for an enriched hiking experience.</string>
     <string name="StartBtn">Let\'s start!</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

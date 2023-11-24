@@ -15,7 +15,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="24sp"
                 android:layout_marginTop="10dp"
-                android:text="You know exactly what to do"
+                android:text="Let start your first hike!"
                 android:textStyle="italic"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

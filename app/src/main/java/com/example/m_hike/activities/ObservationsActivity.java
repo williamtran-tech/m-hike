@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -31,7 +32,18 @@ public class ObservationsActivity extends AppCompatActivity {
 
     private int hikeId;
     private int observationId;
+    private boolean isChanged = false;
     private int[] observationPosition = new int[2];
+    @Override
+    public void onBackPressed() {
+        if (isChanged) {
+            setResult(Activity.RESULT_OK);
+            finish();
+        } else {
+            finish();
+        }
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,9 +59,15 @@ public class ObservationsActivity extends AppCompatActivity {
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Go back
                 // Add transition animation
-                finish();
+                // if any changes are made
+                if (isChanged) {
+                    setResult(Activity.RESULT_OK);
+                    finish();
+                } else {
+                    finish();
+                }
+
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             }
         });
@@ -77,7 +95,7 @@ public class ObservationsActivity extends AppCompatActivity {
                 byte[] imageByte = observation.getImage();
                 // Turn the image into a bitmap
                 Bitmap bitmap = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                Bitmap rotateImage = HikeDetailsActivity.rotateImage(bitmap, 90);
+                Bitmap rotateImage = HikeDetailsActivity.rotateImage(bitmap, 0);
                 // Display the image with rotated image
                 observationPicture.setImageBitmap(rotateImage);
                 Log.d("Image", bitmap.toString());
@@ -128,7 +146,7 @@ public class ObservationsActivity extends AppCompatActivity {
                         // Remove the old list and add the new one
                         observationList.removeAllViews();
                         displayObservations();
-
+                        isChanged = true;
                         Log.d("Deleted Observation Successfully", String.valueOf(deletedObservation.getId()));
                         // Display a button undo the delete action
                         ConstraintLayout undoBtn = findViewById(R.id.undoBtn);
@@ -164,6 +182,7 @@ public class ObservationsActivity extends AppCompatActivity {
                                 // Undo the delete action
                                 try {
                                     DatabaseHelper.updateObservation(deletedObservation.getId(), deletedObservation.getCaption(), deletedObservation.getDate(), deletedObservation.getImage(), deletedObservation.getLongitude(), deletedObservation.getLatitude(), deletedObservation.getHike().getId(), null);
+                                    isChanged = false;
                                 } catch (ParseException e) {
                                     throw new RuntimeException(e);
                                 }
@@ -207,6 +226,5 @@ public class ObservationsActivity extends AppCompatActivity {
                 });
             }
         }
-
     }
 }

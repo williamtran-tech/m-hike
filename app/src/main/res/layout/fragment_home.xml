@@ -25,11 +25,8 @@
             android:layout_height="80dp"
             android:layout_centerHorizontal="true"
             android:layout_marginStart="10dp"
+            android:outlineAmbientShadowColor="@color/white"
             android:layout_marginTop="10dp"
-            android:elevation="12dp"
-            android:innerRadius="0dp"
-            android:shape="ring"
-            android:thicknessRatio="1.9"
             app:cardCornerRadius="40dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -39,7 +36,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:scaleType="centerCrop"
-                android:src="@drawable/intro_background"></ImageView>
+                android:src="@drawable/intro_background">
+
+            </ImageView>
         </androidx.cardview.widget.CardView>
 
         <TextView

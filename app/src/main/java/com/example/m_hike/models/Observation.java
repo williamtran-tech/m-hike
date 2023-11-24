@@ -1,7 +1,5 @@
 package com.example.m_hike.models;
 
-import android.graphics.Bitmap;
-
 import com.example.m_hike.database.DatabaseHelper;
 
 import java.text.ParseException;

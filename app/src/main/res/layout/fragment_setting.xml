@@ -71,11 +71,12 @@
                     android:layout_width="240dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="40dp"
+                    android:editable="false" android:focusable="false"
                     android:layout_marginTop="10dp"
                     android:background="@drawable/edit_txt"
                     android:ems="10"
-                    android:hint="Full name"
-                    android:inputType="text"
+                    android:hint="Ronaldo Nazario"
+                    android:inputType="none"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
                     android:textSize="14sp"
@@ -104,19 +105,6 @@
 
         </androidx.cardview.widget.CardView>
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/saveBtn"
-            android:layout_width="350dp"
-            android:layout_height="50dp"
-            android:background="@drawable/round_corner"
-            android:text="Update"
-            android:textColor="@color/white"
-            android:layout_marginBottom="10dp"
-            app:layout_constraintBottom_toTopOf="@+id/resetDataBtn"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:ignore="MissingConstraints" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/resetDataBtn"

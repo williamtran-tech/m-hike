@@ -4,14 +4,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +16,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
@@ -31,27 +26,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.m_hike.R;
 import com.example.m_hike.activities.HikeDetailsActivity;
-import com.example.m_hike.activities.fragments.AddFragment;
 import com.example.m_hike.activities.fragments.HomeFragment;
 import com.example.m_hike.database.DatabaseHelper;
-import com.example.m_hike.models.Difficulty;
 import com.example.m_hike.models.Hike;
-import com.example.m_hike.models.Observation;
 import com.google.android.material.chip.Chip;
-
-import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHolder> implements Filterable {
     private ArrayList<Hike> hikeList;
@@ -324,13 +312,10 @@ public class HikeListAdapter extends RecyclerView.Adapter<HikeListAdapter.ViewHo
                             undoBtn.setVisibility(View.GONE);
                             // Add the hike back to the list
                             hikeList.add(position, updatedHike);
-                            Log.d("Updated Hike name: ", updatedHike.getName());
-                            Log.d("Position", String.valueOf(position));
-                            Log.d("Hike ID in list", String.valueOf(hikeList.get(position).getId()));
                             notifyItemInserted(position);
                             notifyItemRangeChanged(position, hikeList.size());
 
-                            // This is the key for motherfacker RecyclerView not messing up the ID of the hike
+                            // This is the key for RecyclerView not messing up the ID of the hike
                             try {
                                 hikeList = DatabaseHelper.getHikes();
                                 hikeList.sort((hike1, hike2) -> hike2.getDate().compareTo(hike1.getDate()));
